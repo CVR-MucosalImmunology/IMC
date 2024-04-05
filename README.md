@@ -58,7 +58,7 @@ Once you are happy with the segmentation, run the following commands in the **An
 - `conda install -c conda-forge matplotlib`
 - `jupyter lab`
 
-Open `3 CellposeBatchSeg.ipynb` and follow the instructions there.
+Now, open `3 CellposeBatchSeg.ipynb` and follow the instructions there.
 
 # (Optional) Training a custom model
 
@@ -68,7 +68,7 @@ TODO
 
 **CellProfiler** is a tool we will use to calculate marker intensities and other metrics for each segmented cell. Install it from [here](https://cellprofiler.org/).
 
-As part of the pipeline, we will be using some custom plugins for CellProfiler Configure CellProfiler to use the plugins by following the steps below:
+As part of the pipeline, we will be using some custom plugins for CellProfiler. Configure CellProfiler to use the plugins by following the steps below:
 1. Open the CellProfiler GUI
 2. Select `File` -> `Preferences...` 
 3. Scroll down and set `CellProfiler plugins directory` to `path/to/ImcSegmentationPipeline/resources/ImcPluginsCP/plugins` and restart CellProfiler
