@@ -13,10 +13,12 @@ Anaconda is a program used to install packages needed for many steps of the pipe
     - Type **'Terminal'** and press return to open 
     
 **Step 3:** Enter the following commands (enter one, press **`Enter`**, then repeat with the next command):
+ 
 - `git clone --recursive https://github.com/BodenmillerGroup/ImcSegmentationPipeline.git`
 - `cd ImcSegmentationPipeline`
 - `conda env create -f environment.yml`
 - `conda activate imcsegpipe`
+- `pip install jupyterlab`
 - `jupyter lab`
 
 This will automatically open a jupyter instance at `http://localhost:8888/lab` in your browser. From there, open the `1 IMCPreprocessing.ipynb` file and follow the instructions there.
@@ -34,10 +36,55 @@ To **open** CellPose (both now and in the future), run both of the following com
 
 **Note:** The steps below were written based on the **CellPose 3** GUI - newer versions may differ slightly
 
-1. Drag an image from the folder into the GUI 
-2. Apply the settings below:
-- 
-3. Optionally set the second channel if you are segmenting cyto and have an available nucleus channel.
-4. Click the calibrate button to estimate the size of the objects in the image. Alternatively (RECOMMENDED) you can set the cell diameter by hand and press ENTER. You will see the size you set as a red disk at the bottom left of the image.
-5. Click the run segmentation button. If MASKS ON is checked, you should see masks drawn on the image.
-Now you can click the LEFT/RIGHT arrow keys to move through the folder and segment another image.
+1. Drag an image from the `cellpose` folder into the GUI 
+2. Apply the settings below (if you wish to use different settings, you can read about them [here](https://cellpose.readthedocs.io/en/latest/settings.html)):
+
+<p align="center">
+  <img src="image.png" />
+</p>
+
+3. Click the **`run cyto3`** button to run the segmentation
+
+If the model requires further tuning, then go to the section below on ‘Training a custom model’ - this will teach you how to build a model from scratch. 
+
+Once you are happy with the segmentation, run the following commands in the **Anaconda Prompt**:
+- `conda activate cellpose`
+- `pip install jupyterlab`
+- `pip install chardet`
+- `pip install --upgrade charset-normalizer`
+- `pip install --upgrade requests jupyter`
+- `conda install -c anaconda numpy`
+- `conda install -c conda-forge scikit-image`
+- `conda install -c conda-forge matplotlib`
+- `jupyter lab`
+
+Open `3 CellposeBatchSeg.ipynb` and follow the instructions there.
+
+# (Optional) Training a custom model
+
+TODO
+
+# 4. Installing and using CellProfiler
+
+**CellProfiler** is a tool we will use to calculate marker intensities and other metrics for each segmented cell. Install it from [here](https://cellprofiler.org/).
+
+As part of the pipeline, we will be using some custom plugins for CellProfiler Configure CellProfiler to use the plugins by following the steps below:
+1. Open the CellProfiler GUI
+2. Select `File` -> `Preferences...` 
+3. Scroll down and set `CellProfiler plugins directory` to `path/to/ImcSegmentationPipeline/resources/ImcPluginsCP/plugins` and restart CellProfiler
+
+To use CellProfiler, open `MeasureMarkers.cpproj` and follow the steps below:
+1. Drag and drop the `analysis/for_cellprofiler` folder into CellProfiler
+2. Select `File` -> `Preferences...` 
+3. Set `Default Input Folder` to `analysis/CellProfilerOutput`
+4. Click the `Analyze Images` button at the bottom of the screen and wait for CellProfiler to finish running
+
+After CellProfiler has finished running, the following files will have been generated in the `analysis/CellProfilerOutput` folder:
+- `cell.csv`: contains features (columns) for each cell (rows)
+- `Experiment.csv`: contains metadata related to the CellProfiler version used
+- `Image.csv`: contains image-level measurements (eg. channel intensities) and acquisition metadata
+- `Object relationships.csv`: contains neighbour information in form of an edge list between cells
+
+Now, you are ready to proceed to the `R` part of the pipeline by opening `Analysis.Rmd`!
+
+
