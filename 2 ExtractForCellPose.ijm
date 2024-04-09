@@ -18,6 +18,7 @@ run("Clear Results");
 run("Close All");
 
 setBatchMode(false);
+run("Set Measurements...", "area mean min redirect=None decimal=3");
 
 
 
@@ -97,7 +98,7 @@ for (i=0; i<list.length; i++) {
 	    }
 	
 	//re-stack images excluding nuclei channel
-	
+
 	selectWindow(dnaIndex);
 	//add slice so that the dna channel doesn't get stacked
 	run("Add Slice");
@@ -105,24 +106,41 @@ for (i=0; i<list.length; i++) {
 	run("Z Project...", "projection=[Average Intensity]");
 	body = getTitle();
 	
+	//add duplicate channel - For OSCAR
+	selectWindow(dnaIndex);
+	run("Duplicate...", "duplicate");
+	rename("empty");
+	Stack.getDimensions(width, height, channels, slices, frames);
+	run("Delete Slice");
+	for(x=0; x<width; x++) {
+		for(y=0;y<height;y++){
+			SetPixel(x,y,0);
+		}
+	}
+
 	//remove slice from dna channel and make stack with projected image (cell body).
 	selectWindow(dnaIndex);
 	run("Delete Slice");
-	run("Merge Channels...", "c1=" + dnaIndex + " c2=AVG_Stack create");
+	run("Merge Channels...", "c1=empty c2=AVG_Stack c3=" + dnaIndex + " create");
 	run("Stack to Hyperstack...", "order=xyczt(default) channels=2 slices=1 frames=1 display=Composite");
 	
 	//adjust contrast
 	Stack.setDisplayMode("color");
 	Stack.setChannel(1);
+	run("Red");
+
+	Stack.setChannel(3);
 	run("Blue");
 	run("Clear Results");
-	run("Set Measurements...", "area mean min redirect=None decimal=3");
 	run("Measure");
 	setMinAndMax(0, getResult("Max", 0)/2);
+
 	Stack.setChannel(2);
+	run("Green");
 	run("Clear Results");
 	run("Measure");
 	setMinAndMax(0, getResult("Max", 0)/2);
+
 	Stack.setDisplayMode("composite");
 	
 	//name image and save
