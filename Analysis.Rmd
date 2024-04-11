@@ -51,7 +51,7 @@ library(tiff)
 
 ```{r eval = FALSE, echo = FALSE}
 # Load CSVs
-cells =  read.csv("CellProfilerOutput/cell.csv")
+cells = read.csv("CellProfilerOutput/cell.csv")
 panel = read.csv("../raw/panel.csv")
 image = read.csv("CellProfilerOutput/Image.csv")
 
