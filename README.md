@@ -12,25 +12,33 @@ Anaconda is a program used to install packages needed for many steps of the pipe
     - Use **`Cmd + Space`** to open Spotlight Search
     - Type **'Terminal'** and press return to open 
     
-**Step 3:** Enter the following commands (enter one, press **`Enter`**, then repeat with the next command):
- 
-- `git clone --recursive https://github.com/BodenmillerGroup/ImcSegmentationPipeline.git`
-- `cd ImcSegmentationPipeline`
-- `conda env create -f environment.yml`
-- `conda activate imcsegpipe`
-- `pip install jupyterlab`
-- `jupyter lab`
+**Step 3:** Enter the following commands (just copy and **`Ctrl + v`** into the terminal):
+
+~~~~sh
+git clone --recursive https://github.com/BodenmillerGroup/ImcSegmentationPipeline.git
+cd ImcSegmentationPipeline
+conda env create -f environment.yml
+conda activate imcsegpipe
+pip install jupyterlab
+jupyter lab
+~~~~
 
 This will automatically open a jupyter instance at `http://localhost:8888/lab` in your browser. From there, open the `1 IMCPreprocessing.ipynb` file and follow the instructions there.
 
 ## 2. Installing and opening CellPose
 
 Open **Anaconda Prompt** and enter the following command to install CellPose:
-- `conda create -n cellpose pytorch=1.8.2 cudatoolkit=10.2 -c pytorch-lts`
+~~~~sh
+conda create -n cellpose pytorch=1.8.2 cudatoolkit=10.2 -c pytorch-lts
+conda activate cellpose
+python -m pip install cellpose[gui]
+~~~~
 
 To **open** CellPose (both now and in the future), run both of the following commands:
-- `conda activate cellpose`
-- `python -m pip install cellpose[gui]` 
+~~~~sh
+conda activate cellpose
+python -m cellpose
+~~~~
 
 ## 3. Using the CellPose GUI
 
@@ -48,15 +56,17 @@ To **open** CellPose (both now and in the future), run both of the following com
 If the model requires further tuning, then go to the section below on ‘Training a custom model’ - this will teach you how to build a model from scratch. 
 
 Once you are happy with the segmentation, run the following commands in the **Anaconda Prompt**:
-- `conda activate cellpose`
-- `pip install jupyterlab`
-- `pip install chardet`
-- `pip install --upgrade charset-normalizer`
-- `pip install --upgrade requests jupyter`
-- `conda install -c anaconda numpy`
-- `conda install -c conda-forge scikit-image`
-- `conda install -c conda-forge matplotlib`
-- `jupyter lab`
+~~~~sh
+conda activate cellpose
+pip install jupyterlab
+pip install chardet
+pip install --upgrade charset-normalizer
+pip install --upgrade requests jupyter
+conda install -c anaconda numpy
+conda install -c conda-forge scikit-image
+conda install -c conda-forge matplotlib
+jupyter lab
+~~~~
 
 Now, open `3 CellposeBatchSeg.ipynb` and follow the instructions there.
 
