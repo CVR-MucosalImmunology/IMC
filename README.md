@@ -27,7 +27,11 @@ pip install jupyterlab
 jupyter lab
 ~~~~
 
-This will automatically open a jupyter instance at `http://localhost:8888/lab` in your browser. From there, open the `1 IMCPreprocessing.ipynb` file and follow the instructions there.
+This will automatically open a Jupyter instance at `http://localhost:8888/lab` in your browser. Upload the `1 IMCPreprocessing.ipynb` file using the upload button: 
+
+
+
+From there, follow the instructions in the notebook file.
 
 ## 2. Installing and opening CellPose
 
