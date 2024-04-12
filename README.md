@@ -39,7 +39,7 @@ From there, follow the instructions in the notebook file.
 
 Open **Anaconda Prompt** and enter the following command to install CellPose:
 ~~~~sh
-conda create -n cellpose pytorch=1.8.2 cudatoolkit=10.2 -c pytorch-lts
+conda create -n cellpose pytorch=1.8.2 cudatoolkit=10.2 -c pytorch-lts --yes (?)
 conda activate cellpose
 python -m pip install cellpose[gui]
 ~~~~
