@@ -29,7 +29,9 @@ jupyter lab
 
 This will automatically open a Jupyter instance at `http://localhost:8888/lab` in your browser. Upload the `1 IMCPreprocessing.ipynb` file using the upload button: 
 
-
+<p align="center">
+  <img src="UploadButton.png" />
+</p>
 
 From there, follow the instructions in the notebook file.
 
