@@ -18,6 +18,10 @@ Anaconda is a program used to install packages needed for many steps of the pipe
 git clone --recursive https://github.com/BodenmillerGroup/ImcSegmentationPipeline.git
 cd ImcSegmentationPipeline
 conda env create -f environment.yml
+~~~~
+
+The `imcsegpipe` conda environment has now been **set up**! To begin on the first step of the pipeline, copy the following commands into the terminal to **activate** this new environment:
+~~~~sh
 conda activate imcsegpipe
 pip install jupyterlab
 jupyter lab
