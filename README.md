@@ -119,7 +119,7 @@ To train a custom Cellpose model, follow the steps below. There is also a YouTub
 10. Repeat **Steps 6-9** until you are happy with the model's performance
 11. The trained model is saved in a new `models` folder with the rest of your `cropped_images`, and will also appear in the GUI under the `Other models` pane (in the `custom models` drop-down menu)
 
-**Note:** it is recommended that you name your model in a systematic way to keep track of the settings you applied. The example model provided was named `IFMasksOnIMCModel_HumanColon_TN3_CD12_FT1`, with special suffixes at the end:
+**Note:** it is recommended you name your model in a systematic way to keep track of the settings you applied. Our model (`IFMasksOnIMCModel_HumanColon_TN3_CD12_FT1`) was named with special suffixes at the end to keep track of this information:
 - **TN3:** the initial model used was **tissuenet_cp3** 
 - **CD12:** the cell diameter was set to 12 pixels
 - **FT1:** the flow threshold was set to 1
@@ -141,7 +141,7 @@ conda install -c conda-forge matplotlib
 jupyter lab
 ~~~~
 
-Upload the `3 CellposeBatchSeg.ipynb` file using the upload button and follow the instructions in the notebook file.
+Once again, this will automatically open a Jupyter instance at `http://localhost:8888/lab` in your browser. Upload the `3 CellposeBatchSeg.ipynb` file using the upload button and follow the instructions in the notebook file.
 
 ## 4. Installing and using CellProfiler
 
@@ -165,6 +165,6 @@ After CellProfiler has finished running, the following files will have been gene
 - `Image.csv`: contains image-level measurements (eg. channel intensities) and acquisition metadata
 - `Object relationships.csv`: contains neighbour information in form of an edge list between cells
 
-Now, you are ready to proceed to the `R` part of the pipeline by opening `5 Analysis.Rmd`!
+Now, you are ready to proceed to the **`R`** part of the pipeline by opening `5 Analysis.Rmd`!
 
 
