@@ -67,13 +67,23 @@ python -m cellpose
 
 1. Drag an image from the `cropped_images` folder into the GUI 
 2. Click **Models** &rarr; **Add custom torch model to GUI** and select your custom model (in this case, the model used was titled `IFMasksOnIMCModel_HumanColon_TN3_CD12_FT1`)
-3. Apply the settings below (if you wish to use different settings, you can read about them [here](https://cellpose.readthedocs.io/en/latest/settings.html)), and click `run` to run the segmentation:
+3. There are several settings available for you to change:
+
+| GUI Setting | Description |
+| -- | -- |
+| diameter (pixels) | Approximate diameter of each cell - you can manually enter this, or press `calibrate` to let the model estimate it (the size is represented by a circular disk at the bottom left of the view window) |
+| chan to segment | Colour channel containing the **cell body** (should be set to `2: green`) |
+| chan2 (optional) |  Colour channel containing the **cell nuclei** (should be set to `3: blue`) |
+| use GPU | Whether to use the GPU on your computer - should be **ticked** if possible to speed up segmentation |
+| additional settings | You can read more about these [here](https://cellpose.readthedocs.io/en/latest/settings.html) |
+
+4. Select your custom model under the `Other models` pane and click `run` to start the segmentation:
 
 <p align="center">
   <img src=".assets/image.png" />
 </p>
 
-4. After the model has finished running, you should see masks drawn around each of your segmented cells
+5. After the model has finished running, you should see masks drawn around each of your segmented cells
 
 If the model requires further tuning, then go to the section below on **‘Training a custom model’** - this will teach you how to build a model from scratch. Otherwise, if you are happy with the model's performance, skip straight to the **'Batch segmentation'** section.
 
