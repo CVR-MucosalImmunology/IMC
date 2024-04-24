@@ -106,7 +106,7 @@ To train a custom Cellpose model, follow the steps below. There is also a YouTub
   <img src=".assets/image3.png" />
 </p>
 
-5. Run the model that worked best for your image again
+5. Select the pre-trained model that worked best for your image and run it again
 6. Correct the segmentation results as you see fit by drawing new ROIs (`right-click`, draw and `right-click` again) and deleting incorrect ones (`Ctrl + left-click`) - remember to press `Ctrl + S` to save your changes
 7. Press `Ctrl + T` to open up the interface for training a new model:
 
@@ -114,7 +114,7 @@ To train a custom Cellpose model, follow the steps below. There is also a YouTub
   <img src=".assets/image4.png" />
 </p>
 
-8. Choose the pre-trained model to start the training from (the model you ran in **Step 5**), name your custom model and press `OK` (the default values for the other parameters should work well in most cases)
+8. Set `initial model` to the pre-trained model you ran in **Step 5**, name your custom model and press `OK` (the default values for the other parameters should work well in most cases)
 9. The model will train and then auto-run on the next image in the folder 
 10. Repeat **Steps 6-9** until you are happy with the model's performance
 11. The trained model is saved in a new `models` folder with the rest of your `cropped_images`, and will also appear in the GUI under the `Other models` pane (in the `custom models` drop-down menu)
