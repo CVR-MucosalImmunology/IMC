@@ -8,7 +8,7 @@
  * 
  * NOTE: You need to set variables and directories in the first section below before running the C:\Users\daniel.buffa\Downloads\ExtractForCellPose.ijmcode. 
  * 
- * Author: heeva.baharlou@gmail.com and oscardong4@gmail.com (24/04/24)
+ * Authors: heeva.baharlou@gmail.com and oscardong4@gmail.com (24/04/24)
  */
  
 roiManager("reset");
