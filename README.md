@@ -71,7 +71,7 @@ python -m cellpose
 
 | GUI Setting | Description |
 | -- | -- |
-| diameter (pixels) | Approximate diameter of each cell - you can manually enter this, or press `calibrate` to let the model estimate it (the size is represented by a circular disk at the bottom left of the view window) |
+| diameter (pixels) | Approximate diameter of each cell - you can manually enter this, or press `calibrate` to let the model estimate it (the size is represented by a disk at the bottom left of the view window) |
 | chan to segment | Colour channel containing the **cell body** (should be set to `2: green`) |
 | chan2 (optional) |  Colour channel containing the **cell nuclei** (should be set to `3: blue`) |
 | use GPU | Whether to use the GPU on your computer - should be **ticked** if possible to speed up segmentation |
