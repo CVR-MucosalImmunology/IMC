@@ -71,9 +71,15 @@ python -m cellpose
 
 4. After the model has finished running, you should see masks drawn around each of your segmented cells
 
-If the model requires further tuning, then go to the section below on **‘Training a custom model’** - this will teach you how to build a model from scratch. 
+If the model requires further tuning, then go to the section below on **‘Training a custom model’** - this will teach you how to build a model from scratch. Otherwise, if you are happy with the model's performance, skip to the section below on **Batch segmentation**.
 
-Once you are happy with the segmentation, run the following commands in the **Anaconda Prompt**:
+## 3c. Training a custom model
+
+TODO
+
+## 3d. Batch segmentation
+
+Once you are happy with the segmentation, run the following commands in **Anaconda Prompt**:
 ~~~~sh
 conda activate cellpose
 pip install jupyterlab
@@ -88,23 +94,20 @@ jupyter lab
 
 Upload the `3 CellposeBatchSeg.ipynb` file using the upload button and follow the instructions in the notebook file.
 
-# 3c. Training a custom model
-
-TODO
-
-# 4. Installing and using CellProfiler
+## 4. Installing and using CellProfiler
 
 **CellProfiler** is a tool we will use to calculate marker intensities and other metrics for each segmented cell. Install it from [here](https://cellprofiler.org/).
 
 As part of the pipeline, we will be using some custom plugins for CellProfiler. Configure CellProfiler to use the plugins by following the steps below:
 1. Open the CellProfiler GUI
-2. Select `File` -> `Preferences...` 
-3. Scroll down and set `CellProfiler plugins directory` to `path/to/ImcSegmentationPipeline/resources/ImcPluginsCP/plugins` and restart CellProfiler
+2. Select **File** &rarr; **Preferences...**
+3. Scroll down and set **CellProfiler plugins directory** to `path/to/ImcSegmentationPipeline/resources/ImcPluginsCP/plugins`
+4. **Restart CellProfiler**
 
-To use CellProfiler, open `MeasureMarkers.cpproj` and follow the steps below:
-1. Drag and drop the `analysis/for_cellprofiler` folder into CellProfiler
-2. Select `File` -> `Preferences...` 
-3. Set `Default Input Folder` to `analysis/CellProfilerOutput`
+To use CellProfiler, open `4 MeasureMarkers.cpproj` and follow the steps below:
+1. Drag and drop the `analysis/for_cellprofiler` folder into the CellProfiler `Images` window
+2. Select **File** &rarr; **Preferences...** 
+3. Set **Default Input Folder** to `analysis/CellProfilerOutput`
 4. Click the `Analyze Images` button at the bottom of the screen and wait for CellProfiler to finish running
 
 After CellProfiler has finished running, the following files will have been generated in the `analysis/CellProfilerOutput` folder:
@@ -113,6 +116,6 @@ After CellProfiler has finished running, the following files will have been gene
 - `Image.csv`: contains image-level measurements (eg. channel intensities) and acquisition metadata
 - `Object relationships.csv`: contains neighbour information in form of an edge list between cells
 
-Now, you are ready to proceed to the `R` part of the pipeline by opening `Analysis.Rmd`!
+Now, you are ready to proceed to the `R` part of the pipeline by opening `5 Analysis.Rmd`!
 
 
