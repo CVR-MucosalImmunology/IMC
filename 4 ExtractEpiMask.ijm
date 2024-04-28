@@ -8,7 +8,6 @@
  * Inputs:
  * 	Essential:
  * 		dir: Path to analysis folder
- * 		dirImages: Path to images
  * 		channelNo: Slice number with Epithelial stain
  * 	Optional:
  * 		thresh: Threshold (default is "Triangle")
@@ -24,38 +23,43 @@
  */
 
 
-//Set true to run in headless mode. Faster and images don't pop up on screen.
+// Set to 'true' to run in headless mode (faster and images don't pop up on screen)
 setBatchMode(false);
 
 roiManager("reset");
 run("Clear Results");
 run("Close All");
 
-// Set variables and directories
-dir = "C:/Users/oscar/Desktop/IMC/IMC_Test_Run/analysis";
-dirImages = dir + "/" + "cpout"  + "/" + "images";
-dirOutput = dir + "/" + "compMasks";
-if(File.exists(dirOutput) == 0) File.makeDirectory(dirOutput);
-//Specify slice in stack that contains Epithelial stain. 
+
+// **** 
+// ESSENTIAL TO CHANGE: Set variables and directories 
+// Set your 'analysis' folder directory
+dir = "C:/Users/daniel.buffa/OneDrive - Westmead Institute for Medical Research/Desktop/Oscar/HeevaData/analysis";
+// Specify the channel number in the full image stack that contains your epithelial stain (eg. E-cadherin)
 channelNo = 6;
+// ****
 
-// #### Modifiable segmentation variables #####
-
+// ####
+// OPTIONAL TO CHANGE: Modifiable segmentation variables
 // Apply threshold. Takes either an integer number up to 65535 or a preset algorihm like "Triangle".
 thresh = "Triangle";
 //After segmenting will remove epi below this pixel area size. Increase to remove more scraps
 epiSize = 150;
-//Gaussian blur. Increase if too many granny dots in final mask or want mask to look smoother.
+// Gaussian blur. Increase if too many granny dots in final mask or want mask to look smoother.
 blurr = 0.75;
-//erode x2 then dilate x2 to get rid of small attachments to larger epi. Increase if too many scraps emanating from epithelium you need to trim off. 
+// erode x2 then dilate x2 to get rid of small attachments to larger epi. Increase if too many scraps emanating from epithelium you need to trim off. 
 erodeNum = 2;
 dilateNum = 2;
-//Built in delay so user can check if happy with result. Also prints number of current image for user to note down if any issues with image. 
-//1000 is 1 second. The image name then pops up for delayTime + 2 seconds to give you time to write down the image name.  
+// Built in delay so user can check if happy with result. Also prints number of current image for user to note down if any issues with image. 
+// 1000 is 1 second. The image name then pops up for delayTime + 2 seconds to give you time to write down the image name.  
 delayTime = 1000;
+// ####
 
-// ################################
 
+// NO NEED TO CHANGE anything from here
+dirImages = dir + "/full_images";
+dirOutput = dir + "/comp_masks";
+if(File.exists(dirOutput) == 0) File.makeDirectory(dirOutput);
 
 // Get list of images in the directory
 list = getFileList(dirImages);
@@ -87,7 +91,7 @@ for (i=0; i<list.length; i++) {
 	//Normalise scale of values. Helps with thresholding being consistent. 
 	run("Enhance Contrast...", "saturated=0.35 normalize");
 	
-    // Apply Gaussian blur. Change Sigma as desired. Default is 0.75 which means 0.75 pixel blurr. 
+    // Apply Gaussian blur. Change Sigma as desired. Default is 0.75 which means 0.75 pixel blur. 
     run("Gaussian Blur...", "sigma=" + blurr + " stack");
 	
 	//Set Measurements to limit to threshold.

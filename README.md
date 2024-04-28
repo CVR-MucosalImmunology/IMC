@@ -143,7 +143,36 @@ jupyter lab
 
 Once again, this will automatically open a Jupyter instance at `http://localhost:8888/lab` in your browser. Upload the `3 CellposeBatchSeg.ipynb` file using the upload button and follow the instructions in the notebook file.
 
-## 4. Installing and using CellProfiler
+## 4. Generating compartment masks
+
+For **epithelial segmentation**, open the ImageJ script `4 ExtractEpiMask.ijm` and **change all required variables** there before running it:
+
+<p align="center">
+  <img src=".assets/image6.png" />
+</p>
+
+**Note:** there are also some *optional* variables you can change too if you wish:
+
+<p align="center">
+  <img src=".assets/image7.png" />
+</p>
+
+This script generates masks for epithelial areas in an image stack by:
+1. Extracting a user-specified channel
+2. Normalizing it
+3. Applying a user defined threshold
+4. Filtering out small particles
+5. Eroding the mask to remove residual attachments to the epithelium
+6. Dilating the mask
+A delay is built into the macro to allow the user to visually check the results during processing and note down names of any 'trouble images' which require correction. All masks are saved to sub-folders within a newly generated `analysis/comp_masks` folder. 
+
+To correct any 'trouble images', open them and run **Invert LUT** from the task bar. Use one of the selection tools to outline areas for removal. Press the backspace key to delete these areas which will then become black (be assigned a value of `0`). Run **Invert LUT** again so the epithelium is black and the background is white (as shown below), then save the image.
+
+<p align="center">
+  <img src=".assets/Untitled (1).png" />
+</p>
+
+## 5. Installing and using CellProfiler
 
 **CellProfiler** is a tool we will use to calculate marker intensities and other metrics for each segmented cell. Install it from [here](https://cellprofiler.org/).
 
@@ -153,7 +182,7 @@ As part of the pipeline, we will be using some custom plugins for CellProfiler. 
 3. Scroll down and set **CellProfiler plugins directory** to `path/to/ImcSegmentationPipeline/resources/ImcPluginsCP/plugins`
 4. **Restart CellProfiler**
 
-To use CellProfiler, open `4 MeasureMarkers.cpproj` and follow the steps below:
+To use CellProfiler, open `5 MeasureMarkers.cpproj` and follow the steps below:
 1. Drag and drop the `analysis/for_cellprofiler` folder into the CellProfiler `Images` window
 2. Select **File** &rarr; **Preferences...** 
 3. Set **Default Input Folder** to `analysis/CellProfilerOutput`
@@ -165,6 +194,6 @@ After CellProfiler has finished running, the following files will have been gene
 - `Image.csv`: contains image-level measurements (eg. channel intensities) and acquisition metadata
 - `Object relationships.csv`: contains neighbour information in form of an edge list between cells
 
-Now, you are ready to proceed to the **`R`** part of the pipeline by opening `5 Analysis.Rmd`!
+Now, you are ready to proceed to the **`R`** part of the pipeline by opening `6 Analysis.Rmd`!
 
 
