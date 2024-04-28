@@ -167,7 +167,12 @@ This script generates masks for epithelial areas in an image stack by:
 
 A delay is built into the macro to allow the user to visually check the results during processing and note down names of any 'trouble images' which require correction. All masks are saved to sub-folders within a newly generated `analysis/comp_masks` folder. 
 
-To correct any 'trouble images', open them and run **Invert LUT** from the task bar. Use one of the selection tools to outline areas for removal. Press the backspace key to delete these areas which will then become black (be assigned a value of `0`). Run **Invert LUT** again so the epithelium is black and the background is white (as shown below), then save the image.
+To correct any 'trouble images', follow the steps below:
+1. Open them and run **Invert LUT** from the task bar
+2. Use one of the selection tools to outline areas for removal
+3. Press the `Backspace` key to delete these areas, which will then become black (assigned a value of `0`)
+4. Run **Invert LUT** again so the epithelium is black and the background is white (as shown below)
+5. Save the image
 
 <p align="center">
   <img src=".assets/Untitled (1).png" />
