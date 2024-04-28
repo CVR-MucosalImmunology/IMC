@@ -165,7 +165,7 @@ This script generates masks for epithelial areas in an image stack by:
 5. **Eroding** the mask to remove residual attachments to the epithelium
 6. **Dilating** the mask
 
-A delay is built into the macro to allow the user to visually check the results during processing and note down names of any 'trouble images' which require correction. All masks are saved to sub-folders within a newly generated `analysis/comp_masks` folder. 
+A delay is built into the macro to allow the user to visually check the results during processing and note down names of any 'trouble images' which require correction. All masks are saved to the existing `analysis/for_cellprofiler` folder, with the suffix `_full_EP` at the end of the filename. 
 
 To correct any 'trouble images', follow the steps below:
 1. Open them and run **Invert LUT** from the task bar
@@ -192,7 +192,19 @@ To use CellProfiler, open `5 MeasureMarkers.cpproj` and follow the steps below:
 1. Drag and drop the `analysis/for_cellprofiler` folder into the CellProfiler `Images` window
 2. Select **File** &rarr; **Preferences...** 
 3. Set **Default Input Folder** to `analysis/CellProfilerOutput`
-4. Click the `Analyze Images` button at the bottom of the screen and wait for CellProfiler to finish running
+4. Click the **first** `MeasureMarkerIntensityMultichannel` module on the left hand side of the screen (the `FullStack` box in **Select images to measure** should be ticked), and set the number of channels in your full image stack:
+
+<p align="center">
+  <img src=".assets/image8.png" />
+</p>
+
+5. Click the **first** `ExportToSpreadsheet` module on the left hand side of the screen, press the `Press button to select measurements` button, click **cell** &rarr; **Intensity** &rarr; **MeanIntensity** to open a series of drop-down menus, make sure the **3 boxes** below are **ALL** ticked, and click `OK`:
+
+<p align="center">
+  <img src=".assets/image9.png" />
+</p>
+
+6. Click the `Analyze Images` button at the bottom of the screen and wait for CellProfiler to finish running
 
 After CellProfiler has finished running, the following files will have been generated in the `analysis/CellProfilerOutput` folder:
 - `cell.csv`: contains features (columns) for each cell (rows)

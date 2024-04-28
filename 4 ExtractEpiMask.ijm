@@ -58,7 +58,7 @@ delayTime = 1000;
 
 // NO NEED TO CHANGE anything from here
 dirImages = dir + "/full_images";
-dirOutput = dir + "/comp_masks";
+dirOutput = dir + "/for_cellprofiler";
 if(File.exists(dirOutput) == 0) File.makeDirectory(dirOutput);
 
 // Get list of images in the directory
@@ -121,12 +121,9 @@ for (i=0; i<list.length; i++) {
 
     // Create output directory if it doesn't exist
     dir_image_output = dirOutput + "/" + image_name;
-    if(!File.exists(dir_image_output)) {
-        File.makeDirectory(dir_image_output);
-    }
 
     // Save the mask
-    saveAs("Tiff", dir_image_output + "/" + "EP.tiff");
+    saveAs("Tiff", dir_image_output + "_EP.tiff");
 
     // Close the image
     run("Close All");
