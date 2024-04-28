@@ -1,0 +1,141 @@
+/*
+ * ################################## EXTRACT EPITHELIUM MASK ######################################
+ * 
+ * This script generates masks for epithelial areas in an image stack by extracting a user-specified channel, normalizing it, 
+ * applying a user defined threshold, filtering out small particles, eroding the mask to remove residual attachments to the epithelium, 
+ * and then dilating the mask. A delay is built into the macro to allow the user to visually check the results during processing.
+ * 
+ * Inputs:
+ * 	Essential:
+ * 		dir: Path to analysis folder
+ * 		dirImages: Path to images
+ * 		channelNo: Slice number with Epithelial stain
+ * 	Optional:
+ * 		thresh: Threshold (default is "Triangle")
+ * 		epiSize: Minimum pixel area size (default is 150)
+ * 		blurr: Gaussian blur value (default is 0.75)
+ * 		erodeNum: Number of erosions (default is 2)
+ * 		dilateNum: Number of dilations (default is 2)
+ * 		delayTime: Delay time in milliseconds (default is 1000)
+ * Outputs:
+ * 	Epithelial mask images saved in a new directory called compMasks within the analysis directory specified by dir.
+ * 
+ * Author: heeva.baharlou@gmail.com (07/06/2023)
+ */
+
+
+//Set true to run in headless mode. Faster and images don't pop up on screen.
+setBatchMode(false);
+
+roiManager("reset");
+run("Clear Results");
+run("Close All");
+
+// Set variables and directories
+dir = "C:/Users/oscar/Desktop/IMC/IMC_Test_Run/analysis";
+dirImages = dir + "/" + "cpout"  + "/" + "images";
+dirOutput = dir + "/" + "compMasks";
+if(File.exists(dirOutput) == 0) File.makeDirectory(dirOutput);
+//Specify slice in stack that contains Epithelial stain. 
+channelNo = 6;
+
+// #### Modifiable segmentation variables #####
+
+// Apply threshold. Takes either an integer number up to 65535 or a preset algorihm like "Triangle".
+thresh = "Triangle";
+//After segmenting will remove epi below this pixel area size. Increase to remove more scraps
+epiSize = 150;
+//Gaussian blur. Increase if too many granny dots in final mask or want mask to look smoother.
+blurr = 0.75;
+//erode x2 then dilate x2 to get rid of small attachments to larger epi. Increase if too many scraps emanating from epithelium you need to trim off. 
+erodeNum = 2;
+dilateNum = 2;
+//Built in delay so user can check if happy with result. Also prints number of current image for user to note down if any issues with image. 
+//1000 is 1 second. The image name then pops up for delayTime + 2 seconds to give you time to write down the image name.  
+delayTime = 1000;
+
+// ################################
+
+
+// Get list of images in the directory
+list = getFileList(dirImages);
+a = newArray();
+index = 0;
+for (i=0; i<list.length; i++) {
+    if (endsWith(list[i], ".tiff") || endsWith(list[i], ".png") || endsWith(list[i], ".tif")) {
+        a[index] = dirImages + "/" + list[i];
+        index = index + 1;
+    }
+}
+list = a;
+
+// Create an array of integers up to the number of images in the array 'a'
+intArray = newArray(a.length);
+for (i=0; i<a.length; i++) {
+    intArray[i] = i + 1; // +1 because we want to start from 1 instead of 0
+}
+Array.show(intArray, a);
+
+// Process each image
+for (i=0; i<list.length; i++) {
+    // Open the image
+    open(list[i]);
+
+    // Select the desired channel
+    run("Duplicate...", "title=channel_"+channelNo+".tif duplicate channels="+channelNo);
+	
+	//Normalise scale of values. Helps with thresholding being consistent. 
+	run("Enhance Contrast...", "saturated=0.35 normalize");
+	
+    // Apply Gaussian blur. Change Sigma as desired. Default is 0.75 which means 0.75 pixel blurr. 
+    run("Gaussian Blur...", "sigma=" + blurr + " stack");
+	
+	//Set Measurements to limit to threshold.
+	run("Set Measurements...", "area mean min limit redirect=None decimal=3");
+    
+    // Apply threshold. Takes either an integer number up to 65535 or a preset algorihm like "Triangle".
+    checkAndThreshold(thresh);
+    
+    // Filter out small particles and make mask. Set min size of epithlium. Default is 150 pixels. 
+    run("Analyze Particles...", "size=" + epiSize + "-Infinity show=Masks");
+    
+    //erode x2 then dilate x2 to get rid of small attachments to larger epi. You can set number of erosions/dilations as desired. 
+    for(j=0;j<erodeNum;j++) run("Erode");
+    for(j=0;j<dilateNum;j++) run("Dilate");
+	
+	run("Analyze Particles...", "size=" + epiSize + "-Infinity show=Masks");
+	
+    //Built in delay so user can check if happy with result. Also prints number of current image for user to note down if any issues with image. 
+    wait(delayTime);
+	Array.show(intArray, a);
+	print(i + 1);
+	selectWindow("Log");
+	wait(delayTime + 2000);
+	
+    // Get image name without extension
+    image_name = File.nameWithoutExtension;
+
+    // Create output directory if it doesn't exist
+    dir_image_output = dirOutput + "/" + image_name;
+    if(!File.exists(dir_image_output)) {
+        File.makeDirectory(dir_image_output);
+    }
+
+    // Save the mask
+    saveAs("Tiff", dir_image_output + "/" + "EP.tiff");
+
+    // Close the image
+    run("Close All");
+}
+Array.show(intArray, a);
+
+function checkAndThreshold(thresh) {
+    if (isNaN(thresh + 0)) {
+        // The variable 'thresh' is a string.
+        setAutoThreshold(thresh + " dark no-reset");
+    } else {
+        // The variable 'thresh' is a number.
+        setThreshold(thresh, 65535, "raw");
+    }
+}
+
