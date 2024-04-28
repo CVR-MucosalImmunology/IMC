@@ -172,7 +172,7 @@ To correct any 'trouble images', follow the steps below:
 2. Use one of the selection tools to outline areas for removal
 3. Press the `Backspace` key to delete these areas, which will then become black (assigned a value of `0`)
 4. Run **Invert LUT** again so the epithelium is black and the background is white (as shown below)
-5. Save the image
+5. Save the image under the same filename it was originally saved to
 
 <p align="center">
   <img src=".assets/Untitled (1).png" />
