@@ -4,11 +4,11 @@
  * which were set to '1' in the 'Segment' column of "panel.csv".
  * 
  * Inputs: 1. Image stacks in 'for_segmentation' folder. 2. "panel.csv" file.
- * Outputs: 1. 2-channel stack of nuclei and cell-body. 2. Random cropped area of each image for training in cellpose. 
+ * Outputs: 1. 2-channel stack of nuclei and cell-body. 2. Random cropped area of each image for training in Cellpose. 
  * 
- * NOTE: You need to set variables and directories in the first section below before running the C:\Users\daniel.buffa\Downloads\ExtractForCellPose.ijmcode. 
+ * NOTE: You need to set variables and directories in the first section below before running the script.
  * 
- * Authors: heeva.baharlou@gmail.com and oscardong4@gmail.com (24/04/24)
+ * Authors: heeva.baharlou@gmail.com and oscardong4@gmail.com (24/04/2024)
  */
  
 roiManager("reset");

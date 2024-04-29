@@ -19,7 +19,7 @@
  * Outputs:
  * 	Epithelial mask images saved in a new directory called compMasks within the analysis directory specified by dir.
  * 
- * Author: heeva.baharlou@gmail.com (07/06/2023)
+ * Author: heeva.baharlou@gmail.com and oscardong4@gmail.com (29/04/2024)
  */
 
 

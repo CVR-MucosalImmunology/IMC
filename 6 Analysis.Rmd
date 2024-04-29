@@ -14,7 +14,7 @@ knitr::opts_knit$set(root.dir = "C:/Users/daniel.buffa/OneDrive - Westmead Insti
 ## Install Packages
 
 ```{r eval = FALSE, echo = FALSE, include = False}
-norm_pack = c("tidyverse", "BiocManager", "viridis", "RColorBrewer", "cowplot", "gridExtra", "tiff")
+norm_pack = c("knitr", "tidyverse", "BiocManager", "viridis", "RColorBrewer", "cowplot", "gridExtra", "tiff")
 for (p in norm_pack) {
   if (!require(p, quietly = TRUE)) {
     install.packages(p)
@@ -54,6 +54,15 @@ library(tiff)
 cells = read.csv("CellProfilerOutput/cell.csv")
 panel = read.csv("../raw/panel.csv")
 image = read.csv("CellProfilerOutput/Image.csv")
+
+# Move distance measurements to the end of the dataframe
+start_idx = which(names(cells) == "AreaShape_Center_Y")
+end_idx = which(grepl("FullStack", names(cells)))[1] - 1
+if (start_idx < end_idx) {
+  cols_to_move = names(cells)[(start_idx + 1):end_idx]
+  cells = cells %>%
+    select(-all_of(cols_to_move), everything(), all_of(cols_to_move))
+}
 
 # Filter rows and columns
 image = image %>%
@@ -113,7 +122,6 @@ saveRDS(cellsCombined, "RDSFiles/IMCData.rds")
 
 ```{r eval = FALSE, echo = FALSE}
 # Marker expression, other cellular features and spatial features (co-ordinates) are read and merged into a spatial experiment object
-cells =  read.csv("CellProfilerOutput/cell.csv")
 dt = readRDS("RDSFiles/IMCData.rds")
 
 # Split data into marker intensities, metadata and co-ordinates
@@ -321,7 +329,7 @@ for (img in unique(colData(spe)$Image)) {
 
 ```{r eval = FALSE, echo = FALSE}
 # Load custom functions from GitHub
-source("https://raw.githubusercontent.com/CVR-MucosalImmunology/IMC/main/functions.R")
+source("https://raw.githubusercontent.com/CVR-MucosalImmunology/IMC/main/.assets/functions.R")
 ```
 
 ## 2a. FlowJo export
