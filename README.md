@@ -1,4 +1,7 @@
 # Pre-R IMC Pipeline Documentation
+
+### **Authors:** oscardong4@gmail.com and heeva.baharlou@gmail.com
+
 ## 1. Preprocessing and setting up a `conda` environment
 
 Anaconda is a program used to install packages needed for many steps of the pipeline to run. Follow the steps below to set up Anaconda and a `conda` environment:
