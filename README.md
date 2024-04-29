@@ -193,7 +193,12 @@ As part of the pipeline, we will be using some custom plugins for CellProfiler. 
 4. **Restart CellProfiler**
 
 To use CellProfiler, open `5 MeasureMarkers.cpproj` and follow the steps below:
-1. Drag and drop the `analysis/for_cellprofiler` folder into the CellProfiler `Images` window
+1. Drag and drop the `analysis/for_cellprofiler` folder into the CellProfiler `Images` window:
+
+<p align="center">
+  <img src=".assets/image10.png" />
+</p>
+
 2. Select **File** &rarr; **Preferences...** 
 3. Set **Default Output Folder** to `analysis/CellProfilerOutput` and click `Save`
 4. Click the **first** `MeasureMarkerIntensityMultichannel` module on the left hand side of the screen (the `FullStack` box in **Select images to measure** should be ticked), and set the number of channels in your full image stack:
@@ -217,5 +222,3 @@ After CellProfiler has finished running, the following files will have been gene
 - `Object relationships.csv`: contains neighbour information in form of an edge list between cells
 
 Now, you are ready to proceed to the **`R`** part of the pipeline by opening `6 Analysis.Rmd`!
-
-

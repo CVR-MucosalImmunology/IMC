@@ -3,12 +3,16 @@
  * The cell-body image is created by normalising non-nuclei channels (values range between 0 - (2^16-1) = 65535) 
  * which were set to '1' in the 'Segment' column of "panel.csv".
  * 
- * Inputs: 1. Image stacks in 'for_segmentation' folder. 2. "panel.csv" file.
- * Outputs: 1. 2-channel stack of nuclei and cell-body. 2. Random cropped area of each image for training in Cellpose. 
+ * Inputs: 
+ * 	1. Image stacks in 'for_segmentation' folder
+ * 	2. 'panel.csv' file
+ * Outputs: 
+ * 	1. 2-channel stack of nuclei and cell-body
+ * 	2. Random cropped area of each image for training in Cellpose
  * 
  * NOTE: You need to set variables and directories in the first section below before running the script.
  * 
- * Authors: heeva.baharlou@gmail.com and oscardong4@gmail.com (24/04/2024)
+ * Authors: heeva.baharlou@gmail.com and oscardong4@gmail.com (29/04/2024)
  */
  
 roiManager("reset");
@@ -22,9 +26,9 @@ run("Set Measurements...", "area mean min redirect=None decimal=3");
 // **** 
 // CHANGE: Set variables and directories 
 // Set your 'analysis' folder directory
-dir = "C:/Users/daniel.buffa/OneDrive - Westmead Institute for Medical Research/Desktop/Oscar/LizAnalysis/analysis";
+dir = "";
 // Set your 'panel.csv' file directory
-panelDir = "C:/Users/daniel.buffa/OneDrive - Westmead Institute for Medical Research/Desktop/Oscar/LizAnalysis/raw/panel.csv";
+panelDir = "";
 // Change this to what you call your nuclei stain under the 'Target' column in 'panel.csv'. This usually corresponds to the Ir191 or Ir193 Metal tags. 
 dna = "DNA";
 // Size (in pixels) of the square for cropping

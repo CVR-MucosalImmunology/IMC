@@ -1,25 +1,25 @@
 /*
- * ################################## EXTRACT EPITHELIUM MASK ######################################
- * 
- * This script generates masks for epithelial areas in an image stack by extracting a user-specified channel, normalizing it, 
+ * This macro generates masks for epithelial areas in an image stack by extracting a user-specified channel, normalizing it, 
  * applying a user defined threshold, filtering out small particles, eroding the mask to remove residual attachments to the epithelium, 
  * and then dilating the mask. A delay is built into the macro to allow the user to visually check the results during processing.
  * 
  * Inputs:
  * 	Essential:
- * 		dir: Path to analysis folder
- * 		channelNo: Slice number with Epithelial stain
+ * 		dir: path to your 'analysis' folder
+ * 		channelNo: channel number containing your epithelial stain
  * 	Optional:
- * 		thresh: Threshold (default is "Triangle")
- * 		epiSize: Minimum pixel area size (default is 150)
+ * 		thresh: threshold (default is "Triangle")
+ * 		epiSize: minimum pixel area size (default is 150)
  * 		blurr: Gaussian blur value (default is 0.75)
- * 		erodeNum: Number of erosions (default is 2)
- * 		dilateNum: Number of dilations (default is 2)
- * 		delayTime: Delay time in milliseconds (default is 1000)
+ * 		erodeNum: number of erosions (default is 2)
+ * 		dilateNum: number of dilations (default is 2)
+ * 		delayTime: delay time in milliseconds (default is 1000)
  * Outputs:
- * 	Epithelial mask images saved in a new directory called compMasks within the analysis directory specified by dir.
+ * 	Epithelial mask images saved in your 'analysis/for_cellprofiler' folder
+ *
+ * NOTE: You need to set variables and directories in the first section below before running the script.
  * 
- * Author: heeva.baharlou@gmail.com and oscardong4@gmail.com (29/04/2024)
+ * Authors: heeva.baharlou@gmail.com and oscardong4@gmail.com (29/04/2024)
  */
 
 
@@ -34,7 +34,7 @@ run("Close All");
 // **** 
 // ESSENTIAL TO CHANGE: Set variables and directories 
 // Set your 'analysis' folder directory
-dir = "C:/Users/daniel.buffa/OneDrive - Westmead Institute for Medical Research/Desktop/Oscar/HeevaData/analysis";
+dir = "";
 // Specify the channel number in the full image stack that contains your epithelial stain (eg. E-cadherin)
 channelNo = 6;
 // ****
@@ -43,14 +43,14 @@ channelNo = 6;
 // OPTIONAL TO CHANGE: Modifiable segmentation variables
 // Apply threshold. Takes either an integer number up to 65535 or a preset algorihm like "Triangle".
 thresh = "Triangle";
-//After segmenting will remove epi below this pixel area size. Increase to remove more scraps
+// After segmenting will remove epithelium below this pixel area size. Increase to remove more scraps.
 epiSize = 150;
-// Gaussian blur. Increase if too many granny dots in final mask or want mask to look smoother.
+// Gaussian blur. Increase if too many grainy dots in final mask or want mask to look smoother.
 blurr = 0.75;
-// erode x2 then dilate x2 to get rid of small attachments to larger epi. Increase if too many scraps emanating from epithelium you need to trim off. 
+// Erode x2 then dilate x2 to get rid of small attachments to larger epithelium. Increase if too many scraps emanating from epithelium you need to trim off. 
 erodeNum = 2;
 dilateNum = 2;
-// Built in delay so user can check if happy with result. Also prints number of current image for user to note down if any issues with image. 
+// Built-in delay so user can check if happy with result. Also prints number of current image for user to note down if any issues with image. 
 // 1000 is 1 second. The image name then pops up for delayTime + 2 seconds to give you time to write down the image name.  
 delayTime = 1000;
 // ####
