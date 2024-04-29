@@ -36,12 +36,12 @@ run("Close All");
 // Set your 'analysis' folder directory
 dir = "";
 // Specify the channel number in the full image stack that contains your epithelial stain (eg. E-cadherin)
-channelNo = 6;
+channelNo = 7;
 // ****
 
 // ####
 // OPTIONAL TO CHANGE: Modifiable segmentation variables
-// Apply threshold. Takes either an integer number up to 65535 or a preset algorihm like "Triangle".
+// Apply threshold. Takes either an integer number up to 65535 or a preset algorithm like "Triangle".
 thresh = "Triangle";
 // After segmenting will remove epithelium below this pixel area size. Increase to remove more scraps.
 epiSize = 150;
