@@ -195,7 +195,7 @@ As part of the pipeline, we will be using some custom plugins for CellProfiler. 
 To use CellProfiler, open `5 MeasureMarkers.cpproj` and follow the steps below:
 1. Drag and drop the `analysis/for_cellprofiler` folder into the CellProfiler `Images` window
 2. Select **File** &rarr; **Preferences...** 
-3. Set **Default Input Folder** to `analysis/CellProfilerOutput`
+3. Set **Default Output Folder** to `analysis/CellProfilerOutput` and click `Save`
 4. Click the **first** `MeasureMarkerIntensityMultichannel` module on the left hand side of the screen (the `FullStack` box in **Select images to measure** should be ticked), and set the number of channels in your full image stack:
 
 <p align="center">
