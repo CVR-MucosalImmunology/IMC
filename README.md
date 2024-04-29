@@ -6,9 +6,13 @@ Anaconda is a program used to install packages needed for many steps of the pipe
 **Step 1:** Install [**Anaconda** ](https://www.anaconda.com/download) <br>
 **Step 2:** Once Anaconda is installed, navigate to the relevant command line interface:
 
+<div align="center">
+
 | Windows                                                                                            | macOS                                                                                                      |
 |----------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------|
 | 1. Search for **'Anaconda Prompt'** in the taskbar search <br> 2. Select **Anaconda Prompt**  <br> | 1. Use `cmd + space` to open Spotlight Search  <br> 2. Type **'Terminal'** and press `return` to open <br> |
+
+</div>
     
 **Step 3:** Enter the following commands (just copy and **`Ctrl + v`** into the terminal):
 
