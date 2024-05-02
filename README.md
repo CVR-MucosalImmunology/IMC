@@ -17,7 +17,7 @@ Anaconda is a program used to install packages needed for many steps of the pipe
 
 </div>
     
-**Step 3:** Enter the following commands (wait for one line to finish running before running the next one):
+**Step 3:** Enter the following commands (each line should be pasted and run **separately**):
 
 ~~~~sh
 git clone --recursive https://github.com/BodenmillerGroup/ImcSegmentationPipeline.git
