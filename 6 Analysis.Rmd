@@ -14,14 +14,14 @@ knitr::opts_knit$set(root.dir = "C:/Users/daniel.buffa/OneDrive - Westmead Insti
 ## Install Packages
 
 ```{r eval = FALSE, echo = FALSE, include = False}
-norm_pack = c("knitr", "tidyverse", "BiocManager", "viridis", "RColorBrewer", "cowplot", "gridExtra", "tiff")
+norm_pack = c("knitr", "tidyverse", "BiocManager", "viridis", "RColorBrewer", "cowplot", "gridExtra", "tiff", "kohonen")
 for (p in norm_pack) {
   if (!require(p, quietly = TRUE)) {
     install.packages(p)
   }
 }
 
-bioc_pack = c("SpatialExperiment", "dittoSeq", "flowCore", "scater", "BiocSingular", "bluster", "ConsensusClusterPlus")
+bioc_pack = c("SpatialExperiment", "dittoSeq", "flowCore", "scater", "BiocSingular", "bluster", "ConsensusClusterPlus", "CATALYST")
 for (p in bioc_pack) {
   if (!require(p, quietly = TRUE)) {
     BiocManager::install(p)

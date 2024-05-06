@@ -4,7 +4,7 @@
  * which were set to '1' in the 'Segment' column of "panel.csv".
  * 
  * Inputs: 
- * 	1. Image stacks in 'for_segmentation' folder
+ * 	1. Image stacks in '1b_for_segmentation' folder
  * 	2. 'panel.csv' file
  * Outputs: 
  * 	1. 2-channel stack of nuclei and cell-body
@@ -37,9 +37,9 @@ square_size = 200;
 
 
 // NO NEED TO CHANGE anything from here
-dirImages = dir + "/for_segmentation";
-imOutput = dir +  "/cellpose";
-cropOutput =  dir + "/cropped_images";
+dirImages = dir + "/1b_for_segmentation";
+imOutput = dir +  "/2a_cellpose_full";
+cropOutput =  dir + "/2b_cropped_images";
 
 // Create the output directories if they don't exist
 if(File.exists(imOutput) == 0) File.makeDirectory(imOutput);
