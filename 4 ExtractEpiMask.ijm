@@ -15,7 +15,7 @@
  * 		dilateNum: number of dilations (default is 2)
  * 		delayTime: delay time in milliseconds (default is 1000)
  * Outputs:
- * 	Epithelial mask images saved in an 'analysis/3b_for_cellprofiler' and 'analysis/4_compartment_masks' folder
+ * 	Epithelial mask images saved in your 'analysis/3b_for_cellprofiler' folder
  *
  * NOTE: You need to set variables and directories in the first section below before running the script.
  * 
@@ -124,7 +124,6 @@ for (i=0; i<list.length; i++) {
 
     // Save the mask
     saveAs("Tiff", dir_image_output + "_EP.tiff");
-    saveAs("Tiff", dir + "/4_compartment_masks" + "/" + image_name + "_EP.tiff");
 
     // Close the image
     run("Close All");
