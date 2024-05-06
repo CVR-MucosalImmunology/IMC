@@ -17,11 +17,12 @@ Anaconda is a program used to install packages needed for many steps of the pipe
 
 </div>
     
-**Step 3:** Enter the following commands (just copy and **`Ctrl + v`** into the terminal):
+**Step 3:** Enter the following commands (make sure to run the lines **one at a time**):
 
 ~~~~sh
 git clone --recursive https://github.com/BodenmillerGroup/ImcSegmentationPipeline.git
 cd ImcSegmentationPipeline
+git clone --recursive https://github.com/CVR-MucosalImmunology/IMC.git
 conda env create -f environment.yml
 conda activate imcsegpipe
 pip install jupyterlab
