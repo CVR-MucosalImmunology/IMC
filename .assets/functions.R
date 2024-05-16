@@ -5,6 +5,20 @@ createSortedVector <- function(n) {
   return(sorted_numbers)
 }
 
+# Function to process each image and write to FCS
+write_fcs <- function(data, image_id) {
+  # Remove 'ImageID' and 'ImageName' column and ensure the rest is numeric
+  subset_data <- as.matrix(data[, -c(1, (ncol(data)-1):ncol(data))])
+  subset_data <- apply(subset_data, 2, as.numeric)
+  # Ensure column names are set
+  colnames(subset_data) <- make.names(colnames(subset_data))
+  # Convert to flowFrame
+  ff <- flowFrame(subset_data)
+  # Write to FCS
+  fcs_filename <- paste0("../FlowJo/", image_id, ".fcs")
+  write.FCS(ff, file = fcs_filename)
+}
+
 ## Subset cells, batch correct and  SOM cluster
 harmonySOM <- function(spe, compartment_vector = NULL, celltype_column = NULL, celltype_values = NULL, clustMarkers = NULL, batchCol = NULL) {
   # Function processes single-cell data for UMAP, PCA, and SOM clustering.
