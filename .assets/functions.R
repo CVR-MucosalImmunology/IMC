@@ -217,19 +217,17 @@ if (file.exists("clusterModTracker.csv")) {
   )
 }
 
-update_tracking <- function(flowjo_celltype, from_pop, to_pop, marker, value, direction) {
+update_tracking <- function(from_pop, to_pop, marker, value, direction) {
   
   # Create a new entry
-  new_entry <- data.frame(flowjo_celltype = flowjo_celltype,
-                          from_pop = from_pop,
+  new_entry <- data.frame(from_pop = from_pop,
                           to_pop = to_pop,
                           condition = paste(marker, direction, as.character(value)),
                           stringsAsFactors = FALSE)
   
   # Check for duplicate across all variables
   duplicate_index <- with(tracking_table, 
-                          which(flowjo_celltype == new_entry$flowjo_celltype &
-                                  from_pop == new_entry$from_pop &
+                          which(from_pop == new_entry$from_pop &
                                   to_pop == new_entry$to_pop &
                                   condition == new_entry$condition)
   )
@@ -301,7 +299,7 @@ moveCells <- function(speF, target, newTarget, marker, value, direction, celltyp
   print(total_counts)
   
   # Update tracking table
-  update_tracking(colData(speF)$celltype_flowjo[1], target, newTarget, marker, value, direction)
+  update_tracking(target, newTarget, marker, value, direction)
   
   return(speF)
 }
