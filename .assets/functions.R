@@ -1,3 +1,10 @@
+createSortedVector <- function(n) {
+  char_numbers = as.character(1:n)
+  sorted_char_numbers = sort(char_numbers, method = "radix")
+  sorted_numbers = as.integer(sorted_char_numbers)
+  return(sorted_numbers)
+}
+
 ## Subset cells, batch correct and  SOM cluster
 harmonySOM <- function(spe, compartment_vector = NULL, celltype_column = NULL, celltype_values = NULL, clustMarkers = NULL, batchCol = NULL) {
   # Function processes single-cell data for UMAP, PCA, and SOM clustering.
