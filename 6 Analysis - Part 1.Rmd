@@ -1,11 +1,11 @@
 ---
 title: "R IMC Pipeline"
 output: html_document
-date: "2024-05-16"
-authors: "oscardong4@gmail.com, heeva.baharlou@gmail.com"
 ---
 
 # R IMC Pipeline
+
+**Authors:** oscardong4\@gmail.com and heeva.baharlou\@gmail.com (20/05/2024)
 
 ## 0. Setting Up
 
@@ -17,13 +17,13 @@ Change the `root.dir` variable to your `analysis` folder directory, then run the
 source("https://raw.githubusercontent.com/CVR-MucosalImmunology/IMC/main/.assets/functions.R")
 if (!require("knitr", quietly = TRUE)) {install.packages(p)}
 
-# Set your directory here (do NOT touch anything above this line)
+# Set your directory here (do NOT touch anything ABOVE this line)
 knitr::opts_knit$set(root.dir = "")
 ```
 
 #### b) Install Packages
 
-If you do **not** have the necessary packages installed yet, run the chunk below.
+If you do **not** have the necessary packages installed yet, run the chunk below. Otherwise, there is **no need** to run this chunk again.
 
 ```{r eval = FALSE, echo = FALSE, include = False}
 norm_pack = c("tidyverse", "BiocManager", "viridis", "RColorBrewer", "cowplot", "gridExtra", "tiff", "kohonen")
@@ -123,6 +123,8 @@ saveRDS(cellsCombined, "RDSFiles/IMCData.rds")
 This step creates a `SpatialExperiment` object called `spe`, which we will be working out of for most of the subsequent analysis below. For more information on the `SpatialExperiment` class, see [this](https://www.bioconductor.org/packages/release/bioc/vignettes/SpatialExperiment/inst/doc/SpatialExperiment.html).
 
 An arcsinh transformation is applied to the raw marker values, followed by min-max scaling to standardise the values so they lie between 0 and 1. The distributions of a chosen marker (eg. CD3) are plotted to help visualise the effect of these steps.
+
+An `Image_uCellID_key.csv` file is also generated in your `analysis` folder that indicates which unique cell IDs (uCellIDs) correspond to which images.
 
 ```{r}
 # Marker expression, other cellular features and spatial features (co-ordinates) are read and merged into a spatial experiment object
@@ -310,6 +312,7 @@ for (cur_dir in seg_list) {
 # Extract the full assay data (markers) and transpose it
 markers = rownames(spe)
 marker_data = as.data.frame(t(assay(spe, "norm_exprs")))
+
 # Add metadata as columns to marker_data
 metadata = as.data.frame(colData(spe))
 marker_data = cbind(metadata, marker_data)
