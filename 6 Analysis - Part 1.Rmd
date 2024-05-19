@@ -7,13 +7,23 @@ authors: "oscardong4@gmail.com, heeva.baharlou@gmail.com"
 
 # R IMC Pipeline
 
+## 0. Setting Up
+
+#### a) Set Your `analysis` Directory
+
+Change the `root.dir` variable to your `analysis` folder directory, then run the chunk below.
+
 ```{r setup, include=FALSE}
 source("https://raw.githubusercontent.com/CVR-MucosalImmunology/IMC/main/.assets/functions.R")
 if (!require("knitr", quietly = TRUE)) {install.packages(p)}
-knitr::opts_knit$set(root.dir = "C:/Users/daniel.buffa/ImcSegmentationPipeline/IMC/analysis")
+
+# Set your directory here (do NOT touch anything above this line)
+knitr::opts_knit$set(root.dir = "")
 ```
 
-## Install Packages
+#### b) Install Packages
+
+If you do **not** have the necessary packages installed yet, run the chunk below.
 
 ```{r eval = FALSE, echo = FALSE, include = False}
 norm_pack = c("tidyverse", "BiocManager", "viridis", "RColorBrewer", "cowplot", "gridExtra", "tiff", "kohonen")
@@ -31,7 +41,9 @@ for (p in bioc_pack) {
 }
 ```
 
-## Load in Packages
+#### c) Load in Required Packages
+
+Make sure to run the chunk before **every** analysis session - this loads in the required packages.
 
 ```{r eval = FALSE, echo = FALSE, include = False}
 library(tidyverse)
@@ -49,27 +61,34 @@ library(gridExtra)
 library(tiff)
 ```
 
-## 1a) Create Dataframe from CellProfiler Output
+## 1. Importing the Relevant Data
 
-Before this step, make sure to modify `Image.csv` as necessary.
+#### a) Create a DataFrame From Your CellProfiler Output
+
+This step combines the `.csv` files in your `5_cellprofiler_output` folder into a single DataFrame, which is saved as `IMCData.rds` in a new `RDSFiles` folder.
+
+**Important:** before this step, make sure to modify `Image.csv` as necessary to include the `DonorID` and `Condition` associated with each image.
 
 ```{r}
+# Load CSVs
 cells = read.csv("5_cellprofiler_output/cell.csv")
 panel = read.csv("../raw/panel.csv")
 image = read.csv("5_cellprofiler_output/Image.csv")
 
+# Filter rows and columns
 image = image %>%
   mutate(Image = str_remove(FileName_FullStack , "_full\\.tiff")) %>%
   select(-FileName_FullStack)
-
 panel = panel %>%
   dplyr::filter(trimws(Target) != "") %>%
   mutate(Metal = Metal.Tag) %>% 
   select("Metal", "Target") %>%
   dplyr::filter(Metal != "Ir191")
 
+# Join image data with cell data
 cellsCombined = left_join(cells, image, by = join_by(ImageNumber))
 
+# Define old column names and what to change them to
 rename_vec = c(
   "Image" = "Image",
   "ImageNumber" = "ImageID",
@@ -81,7 +100,7 @@ rename_vec = c(
   "Condition" = "Condition"
 )
 
-# Change names in cellsCombined from old names to new names
+# Change names in 'cellsCombined' from old names to new names
 names(cellsCombined) = ifelse(names(cellsCombined) %in% names(rename_vec), rename_vec[names(cellsCombined)], names(cellsCombined))
 
 # Name marker columns
@@ -94,11 +113,16 @@ meta = unname(sapply(strsplit(rename_vec, " = "), '[', 1))
 keep = c(meta,ordered_markers)
 cellsCombined = cellsCombined %>% select(all_of(keep))
 
+# Save DataFrame as a '.rds' file
 dir.create("RDSFiles", showWarnings = FALSE)
 saveRDS(cellsCombined, "RDSFiles/IMCData.rds")
 ```
 
-## 1b) Creating SpatialExperiment ('spe') Object
+#### b) Creating a SpatialExperiment Object
+
+This step creates a `SpatialExperiment` object called `spe`, which we will be working out of for most of the subsequent analysis below. For more information on the `SpatialExperiment` class, see [this](https://www.bioconductor.org/packages/release/bioc/vignettes/SpatialExperiment/inst/doc/SpatialExperiment.html).
+
+An arcsinh transformation is applied to the raw marker values, followed by min-max scaling to standardise the values so they lie between 0 and 1. The distributions of a chosen marker (eg. CD3) are plotted to help visualise the effect of these steps.
 
 ```{r}
 # Marker expression, other cellular features and spatial features (co-ordinates) are read and merged into a spatial experiment object
@@ -122,9 +146,8 @@ spe$Image = as.factor(spe$Image)
 spe$ImageID = as.factor(spe$ImageID)
 spe$DonorID = as.factor(spe$DonorID)
 
-### Assigning colour palettes
+### Assign colour palettes
 color_vectors <- list()
-
 # DonorID
 donor_ids <- unique(spe$DonorID)
 # Create a color vector that repeats  if there are more than 12 unique DonorIDs
@@ -141,8 +164,8 @@ image_colors <- brewer.pal(12, name = "Paired")[as.numeric(image_ids) %% 12 + 1]
 ImageID <- setNames(image_colors, image_ids)
 color_vectors$ImageID <- ImageID
 
+# Merge colour palettes back into 'spe' object
 metadata(spe)$color_vectors <- color_vectors
-
 colnames(spe) = paste0(spe$ImageID, "_", spe$CellID)
 
 # Plot current distribution
@@ -201,20 +224,26 @@ uIDKey = uIDKey %>%
   dplyr::filter(row_number()==1) %>%
   select(Image, ImageID, uCellID)
 
-# Write a csv matching ImageIDs with uCellIDs
+# Write a CSV matching ImageIDs with uCellIDs
 write.csv(uIDKey, "Image_uCellID_key.csv")
 saveRDS(spe, "RDSFiles/spe.rds")
 ```
 
-## 2a) Export as '.fcs' to gate in FlowJo
+## 2. Gating Populations in FlowJo with Help From Mantis
+
+#### a) Export as `.fcs` to Gate in FlowJo
+
+This step generates one `.fcs` file for **each** image in a new `FlowJo` folder, which you can then gate on as usual. There is also an `exports` folder created **within** your `FlowJo` folder for you to export your gated populations to.
 
 ```{r}
+# Load in 'spe' object
 spe = readRDS("RDSFiles/spe.rds")
+
+# Re-extract image data and metadata
 image = read.csv("5_cellprofiler_output/image.csv") %>%
   mutate(ImageName = str_remove(FileName_FullStack , "_full\\.tiff")) %>%  
   select(ImageNumber, ImageName) %>%
   dplyr::rename(ImageID = ImageNumber)
-
 metadata = as.data.frame(colData(spe)) %>%
   select(ImageID, uCellID, CellID, Area)
 
@@ -229,26 +258,38 @@ df = df %>%
   group_by(ImageID) %>%
   mutate(Y = max(Y)-Y)
 
+# Export data as '.fcs' to gate in FlowJo
 split_data = split(df, df$ImageName)
 dir.create("../FlowJo/exports", showWarnings = FALSE, recursive = TRUE)
 lapply(names(split_data), function(name) write_fcs(split_data[[name]], name))
 ```
 
-## 2b) Prepare 'MantisProject' folder to view in Mantis
+#### b) Prepare a `MantisProject` Folder to View Cells in Mantis
+
+You can download Mantis Viewer from [here](https://github.com/CANDELbio/mantis-viewer/releases). It is an application we will use to visualise cells and marker expressions from our IMC images. Mantis Viewer requires a `MantisProject` folder to view images from, which will be generated by the chunk below.
 
 ```{r}
+# Load in 'spe' object and 'panel.csv' file
 spe = readRDS("RDSFiles/spe.rds")
 panel = read.csv("../raw/panel.csv")
+
+# Create 'MantisProject' folder
 dir.create("../MantisProject", showWarnings = FALSE)
+
+# List TIFFs and CSVs in the '1c_full_images' folder
 tiffs = list.files("1c_full_images", pattern = "\\.tiff$")
 csvs = list.files("1c_full_images", pattern = "\\.csv$")
 
-# Generate individual channel images as TIFFs and copy them to Mantis folder
+# Generate individual channel images as TIFFs and copy them to the MantisProject folder
 for (x in seq_along(tiffs)) {
+  # Extract the name of the current image from the filename
   cur_img = gsub(".{10}$", "", tiffs[x])
+  # Create a new folder for the current image
   dir.create(paste0("../MantisProject/", cur_img), showWarnings = FALSE)
+  # Read TIFF and CSV associated with the current image
   cur_tiff = readTIFF(paste0("1c_full_images/", tiffs[x]), all=TRUE)
   cur_csv = read.csv(paste0("1c_full_images/", csvs[x]), header=FALSE)$V1
+  # Save each individual channel in the TIFF as a separate image
   for (channel in seq_along(cur_tiff)) {
     metal_tag = cur_csv[channel]
     marker = panel$Target[panel$Metal.Tag == metal_tag]
@@ -258,7 +299,7 @@ for (x in seq_along(tiffs)) {
   }
 }
 
-# Copy segmentation masks to Mantis folder
+# Copy segmentation masks to 'MantisProject' folder
 seg_list = list.files("3a_segmentation_masks", pattern = "\\.tif$")
 for (cur_dir in seg_list) {
   cur_img = gsub(".{23}$", "", cur_dir)
@@ -290,171 +331,41 @@ for (img in unique(colData(spe)$Image)) {
 }
 ```
 
-## 2c) Gate in FlowJo with reference to Mantis
+#### c) Gate in FlowJo with Reference to Mantis Viewer
 
-## 3. Import FlowJo clusters into Mantis for viewing
+Use Mantis Viewer to assist your gating in FlowJo, by visually checking your threshold values for each marker to see that they are accurate.
 
-You can create new gates in FlowJo then re-export for viewing again if desired by re-running this step.
+#### d) Import FlowJo Clusters Into Mantis Viewer For Verifying 
 
-**Note:** each cell can only be assigned to ONE population
+To check that you are happy with your gating in FlowJo, you can import your populations into Mantis Viewer and view them. This step generates a `FlowJo_CellTypes.csv` file in your `MantisProject` folder, which you can **import** and **view** as a new **population** in Mantis Viewer.
+
+If you wish to change your gating a bit, simply create new gates in FlowJo and re-export your populations as `.csv` files to your `FlowJo/exports` folder. Then, **re-run** the chunk below to **overwrite** the existing `FlowJo_CellTypes.csv` file so you can view your new populations.
 
 ```{r}
+# Load in 'spe' object
 spe = readRDS("RDSFiles/spe.rds")
 
+# List exported CSVs from FlowJo
 csvs = list.files(path = "../FlowJo/exports", pattern = "*.csv", full.names = TRUE)
 
+# Combine CSVs from FlowJo and metadata into one DataFrame
 csvs = lapply(csvs, add_celltype)
 flowjo_df = bind_rows(csvs) %>%
   select(uCellID, celltype_flowjo)
 flowjo_df$celltype_flowjo = as.factor(flowjo_df$celltype_flowjo)
-
 metadata = as.data.frame(colData(spe))
 flowjo_df = left_join(metadata, flowjo_df, by = c("uCellID"))
 
+# Remove NAs (cells without an assigned population from FlowJo)
 celltype_info = flowjo_df[, c("Image", "CellID", "celltype_flowjo")] %>%
   na.omit()
 
+# Export FlowJo populations for viewing in Mantis Viewer 
 celltype_by_image = split(celltype_info, celltype_info$Image)
-
 celltypes = lapply(names(celltype_by_image), extract_celltypes)
 celltype_df = bind_rows(celltypes)
-
 write.table(celltype_df, "../MantisProject/FlowJo_CellTypes.csv", sep=",",  col.names=FALSE, row.names=FALSE)
+
+# Save FlowJo populations as a '.rds' file
 saveRDS(celltype_df, "RDSFiles/flowjo_celltypes.rds")
-```
-
-## 4a) SOM clustering
-
-```{r}
-celltype_df = readRDS("RDSFiles/flowjo_celltypes.rds")
-spe = readRDS("RDSFiles/spe.rds")
-colData(spe)$to_cluster = NULL
-
-# List of populations to perform clustering on
-to_cluster = c("CD3+", "Test", "Hello")
-maxClust = 30
-clustNumber = 12
-forClust = c("CD45RO", "CD8", "CXCR3", 
-             "CCR7", "CCR6", "Ki67",
-             "CD69-Cy5", "CD3", "CD4", "HLA-DR")
-
-cells_forClust = celltype_df[celltype_df$celltype_flowjo %in% to_cluster, ] %>%
-  select(-celltype_flowjo) %>%
-  distinct()
-cells_forClust$to_cluster = "Y"
-
-metadata = as.data.frame(colData(spe))
-metadata = left_join(metadata, cells_forClust, by = c("Image","CellID"))
-spe$to_cluster = metadata$to_cluster
-
-clustOut = harmonySOM(spe,
-                      celltype_column = "to_cluster",
-                      celltype_values = "Y",
-                      clustMarkers = forClust,
-                      batchCol = NULL)
-
-# Cluster the 100 SOM codes into larger clusters
-ccp = ConsensusClusterPlus(t(clustOut[[1]]$objects$som$codes[[1]]),
-                            maxK = maxClust,
-                            reps = 100, 
-                            distance = "euclidean", 
-                            seed = 220410, 
-                            plot = NULL)
-
-# Visualize delta area plot
-CATALYST:::.plot_delta_area(ccp)
-
-# Save UMAP, Heatmap, and Z-score graphs to 'Graphs' using clustering results
-dir.create("../Graphs", showWarnings = FALSE)
-spe_subset = clustGraphs(clustOut, ccp, clustNumber, "All", TRUE, "../Graphs")
-
-# Generate UMAP of individual marker expression values and save to 'Graphs'
-png(file.path(getwd(), "../Graphs", "markerPlots.png"), width = 3000, height = 3000, res = 300) 
-plot_list_harmony = multi_dittoDimPlot(spe_subset, var=rownames(spe_subset), reduction.use = "UMAP", assay = "norm_exprs", size = 0.2, list.out = TRUE) 
-plot_list_harmony = lapply(plot_list_harmony, function(x) x + scale_color_viridis())
-print(plot_grid(plotlist = plot_list_harmony))
-dev.off()
-```
-
-## 4b) Export clusters to Mantis for viewing
-
-```{r eval = FALSE, echo = FALSE, include = FALSE}
-clust_celltypes = as.data.frame(colData(spe_subset))
-clust_celltypes = clust_celltypes %>% 
-  select(Image, CellID, som_clusters_corrected) 
-
-write.table(clust_celltypes, "../MantisProject/Clustered_CellTypes.csv", sep=",",  col.names=FALSE, row.names=FALSE)
-saveRDS(clust_celltypes, "RDSFiles/clustered_celltypes.rds")
-```
-
-## 4c) Rename clusters and re-export to Mantis
-
-```{r eval = FALSE, echo = FALSE, include = FALSE}
-## If you wish to rename clusters (eg. 1 is " T cell"), run his chunk to overwrite the '_final_celltypes.csv' file from above
-
-# **** Enter names of clusters on right side then run this code - delete rows you don't need if you ran fewer clusters ****
-clust_celltypes = readRDS("RDSFiles/clustered_celltypes.rds")
-named_clusters = recode(spe_subset$som_clusters_corrected,
-                            "1" = "T cell",
-                            "2" = "B cell",
-                            "3" = "C",
-                            "4" = "D",
-                            "5" = "E",
-                            "6" = "F",
-                            "7" = "G",
-                            "8" = "H",
-                            "9" = "I",
-                            "10" = "J",
-                            "11" = "K",
-                            "12" = "L")
-
-# Change current 'celltype' column
-clust_celltypes = readRDS("RDSFiles/clustered_celltypes.rds")
-named_celltypes = clust_celltypes
-named_celltypes$som_clusters_corrected = named_clusters
-
-spe_subset$celltype = named_clusters
-
-write.table(named_celltypes, "../MantisProject/Annotated_CellTypes.csv", sep=",",  col.names=FALSE, row.names=FALSE)
-saveRDS(named_celltypes, "RDSFiles/annotated_celltypes.rds")
-```
-
-## 4d) Re-assigning cells to new populations
-
-```{r eval = FALSE, echo = FALSE}
-## If you wish to re-assign certain cells to a different population, run this chunk
-
-# **** Visualise marker expression for a celltype to determine an appropriate cut off for reassigning cells using 'moveCells' function on next line ****
-
-# For example, here 'T cell' entries in are evaluated for 'CD3' expression with a cut-off of 0.4 
-visMarker(spe_subset, "T cell", "CD3", 0.4)
-```
-
-```{r eval = FALSE, echo = FALSE}
-# **** Assign cells from 'target' population to 'newTarget' based on 'value' of 'marker' being above/below 'direction' ****
-
-# For example, reassign cells from 'T cell' population in to 'B' population if CD3 expression is greater than (>) 0.4
-spe_subset = moveCells(spe_subset, target="B cell", newTarget="T cell", marker="CD3", value=0.4, direction="<")
-
-# Make temporary column the new 'celltype' column
-colData(spe_subset)$celltype = colData(spe_subset)$reassigned_celltype
-colData(spe_subset)$reassigned_celltype = NULL
-
-# Print updated UMAP with annotations (set 'do.label = FALSE' to remove labels)
-UMAP_graph = dittoDimPlot(spe_subset, var = "celltype",
-             reduction.use = "UMAP", size = 1.2,
-             do.label = TRUE, labels.size = 2.5,
-             legend.size = 4) +
-    ggtitle("SOM clusters on UMAP, integrated cells")
-UMAP_graph
-ggsave(file.path("../Graphs", "UMAP_labelled_annotated.png"), UMAP_graph, width = 6, height = 4.5)
-
-# Save subsetted data
-saveRDS(spe_subset, "RDSFiles/reassigned_spe.rds")
-
-# Create new population CSV for viewing in Mantis
-reassigned_celltypes = as.data.frame(colData(spe_subset)) %>%
-  select(Image, ImageID, celltype)
-write.table(reassigned_celltypes, "../MantisProject/Reassigned_CellTypes.csv", sep=",",  col.names=FALSE, row.names=FALSE)
-saveRDS(reassigned_celltypes, "RDSFiles/reassigned_celltypes.rds")
 ```
