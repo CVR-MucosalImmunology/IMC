@@ -5,6 +5,18 @@ createSortedVector <- function(n) {
   return(sorted_numbers)
 }
 
+add_celltype = function(x) {
+  df = read.csv(x, header = T)
+  celltype = sub("\\.csv$", "", basename(x))
+  df$celltype_flowjo = rep(celltype, nrow(df))
+  return(df)
+}
+
+extract_celltypes = function(img) {
+  df = celltype_by_image[[img]]
+  return(as.data.frame(df))
+}
+
 # Function to process each image and write to FCS
 write_fcs <- function(data, image_id) {
   # Remove 'ImageID' and 'ImageName' column and ensure the rest is numeric
