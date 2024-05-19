@@ -2,7 +2,7 @@
 title: "R IMC Pipeline"
 output: html_document
 date: "2024-05-16"
-authors: oscardong4@gmail.com and heeva.baharlou@gmail.com
+authors: "oscardong4@gmail.com, heeva.baharlou@gmail.com"
 ---
 
 # R IMC Pipeline
@@ -302,12 +302,6 @@ You can create new gates in FlowJo then re-export for viewing again if desired b
 spe = readRDS("RDSFiles/spe.rds")
 
 csvs = list.files(path = "../FlowJo/exports", pattern = "*.csv", full.names = TRUE)
-add_celltype = function(x) {
-  df = read.csv(x, header = T)
-  celltype = sub("\\.csv$", "", basename(x))
-  df$celltype_flowjo = rep(celltype, nrow(df))
-  return(df)
-}
 
 csvs = lapply(csvs, add_celltype)
 flowjo_df = bind_rows(csvs) %>%
@@ -321,11 +315,6 @@ celltype_info = flowjo_df[, c("Image", "CellID", "celltype_flowjo")] %>%
   na.omit()
 
 celltype_by_image = split(celltype_info, celltype_info$Image)
-
-extract_celltypes = function(img) {
-  df = celltype_by_image[[img]]
-  return(as.data.frame(df))
-}
 
 celltypes = lapply(names(celltype_by_image), extract_celltypes)
 celltype_df = bind_rows(celltypes)
@@ -375,12 +364,12 @@ ccp = ConsensusClusterPlus(t(clustOut[[1]]$objects$som$codes[[1]]),
 # Visualize delta area plot
 CATALYST:::.plot_delta_area(ccp)
 
-# Save UMAP, Heatmap, and Z-score graphs to 'ClustGraphs' using clustering results
-dir.create("../ClustGraphs", showWarnings = FALSE)
-spe_subset = clustGraphs(clustOut, ccp, clustNumber, "All", TRUE, "../ClustGraphs")
+# Save UMAP, Heatmap, and Z-score graphs to 'Graphs' using clustering results
+dir.create("../Graphs", showWarnings = FALSE)
+spe_subset = clustGraphs(clustOut, ccp, clustNumber, "All", TRUE, "../Graphs")
 
-# Generate UMAP of individual marker expression values and save to 'ClustGraphs'
-png(file.path(getwd(), "../ClustGraphs", "markerPlots.png"), width = 3000, height = 3000, res = 300) 
+# Generate UMAP of individual marker expression values and save to 'Graphs'
+png(file.path(getwd(), "../Graphs", "markerPlots.png"), width = 3000, height = 3000, res = 300) 
 plot_list_harmony = multi_dittoDimPlot(spe_subset, var=rownames(spe_subset), reduction.use = "UMAP", assay = "norm_exprs", size = 0.2, list.out = TRUE) 
 plot_list_harmony = lapply(plot_list_harmony, function(x) x + scale_color_viridis())
 print(plot_grid(plotlist = plot_list_harmony))
@@ -458,7 +447,7 @@ UMAP_graph = dittoDimPlot(spe_subset, var = "celltype",
              legend.size = 4) +
     ggtitle("SOM clusters on UMAP, integrated cells")
 UMAP_graph
-ggsave(file.path("../ClustGraphs", "UMAP_labelled_annotated.png"), UMAP_graph, width = 6, height = 4.5)
+ggsave(file.path("../Graphs", "UMAP_labelled_annotated.png"), UMAP_graph, width = 6, height = 4.5)
 
 # Save subsetted data
 saveRDS(spe_subset, "RDSFiles/reassigned_spe.rds")
