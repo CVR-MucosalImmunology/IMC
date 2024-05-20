@@ -25,7 +25,8 @@ knitr::opts_knit$set(root.dir = "")
 
 If you do **not** have the necessary packages installed yet, run the chunk below. Otherwise, there is **no need** to run this chunk again.
 
-```{r eval = FALSE, echo = FALSE, include = False}
+```{r}
+# Install normal packages
 norm_pack = c("tidyverse", "BiocManager", "viridis", "RColorBrewer", "cowplot", "gridExtra", "tiff", "kohonen")
 for (p in norm_pack) {
   if (!require(p, quietly = TRUE)) {
@@ -33,6 +34,7 @@ for (p in norm_pack) {
   }
 }
 
+# Install Bioconductor packages
 bioc_pack = c("SpatialExperiment", "dittoSeq", "flowCore", "scater", "BiocSingular", "bluster", "ConsensusClusterPlus", "CATALYST")
 for (p in bioc_pack) {
   if (!require(p, quietly = TRUE)) {
@@ -45,7 +47,8 @@ for (p in bioc_pack) {
 
 Make sure to run the chunk before **every** analysis session - this loads in the required packages.
 
-```{r eval = FALSE, echo = FALSE, include = False}
+```{r}
+# Import required packages
 library(tidyverse)
 library(SpatialExperiment)
 library(dittoSeq)
@@ -171,13 +174,11 @@ metadata(spe)$color_vectors <- color_vectors
 colnames(spe) = paste0(spe$ImageID, "_", spe$CellID)
 
 # Plot current distribution
-dittoRidgePlot(spe, var="CD3", group.by="ImageID", assay="counts", max=10) +
-    ggtitle("CD3 - before transformation")
+suppressMessages(print(dittoRidgePlot(spe, var="CD3", group.by="ImageID", assay="counts", max=10) + ggtitle("CD3 - before transformation")))
 
 # Plot distribution after arcsinh transforming data
 assay(spe, "exprs") = asinh(counts(spe))
-dittoRidgePlot(spe, var="CD3", group.by="ImageID", assay="exprs", max=10) +
-    ggtitle("CD3 - after arcsinh transformation")
+suppressMessages(print(dittoRidgePlot(spe, var="CD3", group.by="ImageID", assay="exprs", max=10) + ggtitle("CD3 - after arcsinh transformation")))
 
 ### Standardise values between 0 and 1 for each image
 # Extract the expression matrix and image information
@@ -216,7 +217,7 @@ for (image in unique_images) {
 assay(spe, "norm_exprs") = base_matrix
 
 # Plot distribution after standardising the data
-dittoRidgePlot(spe, var="CD3", group.by="ImageID", assay="norm_exprs", max=1.0) + ggtitle("CD3 - after standardising")
+suppressMessages(print(dittoRidgePlot(spe, var="CD3", group.by="ImageID", assay="norm_exprs", max=1.0) + ggtitle("CD3 - after standardising")))
 
 # Add a universal CellID column
 colData(spe)$uCellID = 1:length(spe$CellID) 
@@ -338,7 +339,7 @@ for (img in unique(colData(spe)$Image)) {
 
 Use Mantis Viewer to assist your gating in FlowJo, by visually checking your threshold values for each marker to see that they are accurate.
 
-#### d) Import FlowJo Clusters Into Mantis Viewer For Verifying 
+#### d) Import FlowJo Clusters Into Mantis Viewer For Verifying
 
 To check that you are happy with your gating in FlowJo, you can import your populations into Mantis Viewer and view them. This step generates a `FlowJo_CellTypes.csv` file in your `MantisProject` folder, which you can **import** and **view** as a new **population** in Mantis Viewer.
 
