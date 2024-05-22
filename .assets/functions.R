@@ -32,7 +32,7 @@ write_fcs <- function(data, image_id) {
 }
 
 ## Subset cells, batch correct and  SOM cluster
-harmonySOM <- function(spe, compartment_vector = NULL, celltype_column = NULL, celltype_values = NULL, clustMarkers = NULL, batchCol = NULL) {
+harmonySOM2 <- function(spe, compartment_vector = NULL, celltype_column = NULL, celltype_values = NULL, clustMarkers = NULL, batchCol = NULL) {
   # Function processes single-cell data for UMAP, PCA, and SOM clustering.
   # - spe: Single-cell experiment object.
   # - celltype_column, celltype_values, compartment_vector: Optional parameters for subsetting.
@@ -86,13 +86,18 @@ harmonySOM <- function(spe, compartment_vector = NULL, celltype_column = NULL, c
   
   # Perform SOM clustering
   set.seed(220410)
-  som.out <- clusterRows(reducedDim(spe_subset, umapName), SomParam(100), full = TRUE)
+  if (dim(spe_subset)[2]/2 >= 100) {
+    som_param = 100
+  } else {
+    som_param = dim(spe_subset)[2]/2
+  }
+  som.out <- clusterRows(reducedDim(spe_subset, umapName), SomParam(som_param), full = TRUE)
   
   return(list(som.out = som.out, spe_subset = spe_subset))
 }
 
 
-#Example Useage
+#Example Usage
 # clustOut = harmonySOM(spe, "LA", "celltype_flowjo", "Tcell")
 
 
