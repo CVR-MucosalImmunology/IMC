@@ -318,3 +318,74 @@ moveCells <- function(speF, target, newTarget, marker, value, direction, celltyp
 
 # Example usage:
 # moveCells(spe_subset, "Cycling DC", "B cell", "CD20", 0.5, ">")
+
+makeHeatmap <- function(clustOutF, ccpF, ccp_clustNum, graph_type, annotate_labels, save_path,  assayName = "norm_exprs", genes=c("")) {
+  # Function clustGraphs: Generates and saves UMAP, Heatmap, and Z-score graphs based on clustering results.
+  # - clustOutF: Output of harmonySOM function which contains in entry 1 the SOM clustered data and entry 2 the subsetted SingleCellExperiment object with clustering information.
+  # - ccpF: is the ccp variable which holds the output of ConsensusClusterPlus Clustering.
+  # - ccp_clustNum: Numeric value of clusters from ConsensusClusterPlus.
+  # - graph_type: Type of graph to generate ('All', 'UMAP', 'Heatmap', 'Zscore').
+  # - annotate_labels: Boolean to indicate whether to annotate labels on graphs.
+  # - save_path: Folder path for saving the generated graphs.
+  # Returns speF which has the cluster number annotations added as a metadata column
+  
+  set.seed(220228)
+  
+  somOutput = clustOutF[[1]]
+  speF = clustOutF[[2]]
+  # Check if save_path has a trailing slash and add one if it doesn't
+  if (substr(save_path, nchar(save_path), nchar(save_path)) != "/") {
+    save_path <- paste0(save_path, "/")
+  }
+  
+  # Convert ccp_clustNum to string for file naming
+  cluster_str <- as.character(ccp_clustNum)
+  
+  # Link ConsensusClusterPlus clusters with SOM codes and save in object
+  som.cluster <- ccpF[[ccp_clustNum]][["consensusClass"]][somOutput$clusters]
+  speF$som_clusters_corrected <- as.factor(som.cluster)
+  
+  # Determine graph types and generate accordingly
+  if (graph_type %in% c("All", "UMAP")) {
+    
+    p1 <- dittoDimPlot(speF, var = "som_clusters_corrected", 
+                       reduction.use = "UMAP", size = 1.2,
+                       do.label = annotate_labels, labels.size = 2.5,
+                       legend.size = 4) +
+      ggtitle("SOM clusters on UMAP, integrated cells")
+    print(p1)
+    ggsave(paste0(save_path, cluster_str, "_UMAP_labelled.png"), p1, width = 6, height = 4.5)
+  }
+  
+  if (graph_type %in% c("All", "Heatmap")) {
+    # Choose the smaller number between the total number of cells and 2000
+    cell_count <- min(ncol(speF), 2000)
+    cur_cells <- sample(seq_len(ncol(speF)), cell_count)
+    p1 <- dittoHeatmap(speF[,cur_cells], 
+                       genes = genes,
+                       cluster_rows=F,
+                       assay = assayName, scale = "none",
+                       heatmap.colors = viridis(100), 
+                       annot.by = c("som_clusters_corrected", "DonorID"),
+                       annot.colors = c(dittoColors(1)[1:length(unique(speF$som_clusters_corrected))],
+                                        metadata(speF)$color_vectors$DonorID))
+    print(p1)
+    ggsave(paste0(save_path, cluster_str, "_Heatmap.png"), p1, width = 8.5, height = 6, dpi = 300)
+  }
+  
+  if (graph_type %in% c("All", "Zscore")) {
+    celltype_mean <- aggregateAcrossCells(as(speF, "SingleCellExperiment"),  
+                                          ids = speF$som_clusters_corrected, 
+                                          statistics = "mean",
+                                          use.assay.type = "exprs")
+    p1 <- dittoHeatmap(celltype_mean,
+                       genes = genes, 
+                       assay = "exprs", 
+                       cluster_rows = F, 
+                       annot.by = c("som_clusters_corrected"))
+    print(p1)
+    ggsave(paste0(save_path, cluster_str, "_Zscore.png"), p1, width = 8.5, height = 6, dpi = 300)
+  }
+  
+  return(speF)
+}
