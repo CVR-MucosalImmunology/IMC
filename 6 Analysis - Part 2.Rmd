@@ -18,7 +18,7 @@ source("https://raw.githubusercontent.com/CVR-MucosalImmunology/IMC/main/.assets
 if (!require("knitr", quietly = TRUE)) {install.packages(p)}
 
 # Set your directory here (do NOT touch anything ABOVE this line)
-knitr::opts_knit$set(root.dir = "D:/Oscar/IMC/analysis")
+knitr::opts_knit$set(root.dir = "D:/Oscar/IMC Data/analysis")
 ```
 
 #### b) Install Packages
@@ -27,7 +27,7 @@ If you do **not** have the necessary packages installed yet, run the chunk below
 
 ```{r}
 # Install normal packages
-norm_pack = c("tidyverse", "BiocManager", "viridis", "RColorBrewer", "cowplot", "gridExtra", "tiff", "kohonen", "raster")
+norm_pack = c("tidyverse", "BiocManager", "viridis", "RColorBrewer", "cowplot", "gridExtra", "tiff", "kohonen", "ijtiff")
 for (p in norm_pack) {
   if (!require(p, quietly = TRUE)) {
     install.packages(p)
@@ -114,7 +114,7 @@ colnames(cellsCombined)[6:(length(markers)+5)] = ordered_markers
 
 # Keep only desired columns
 meta = unname(sapply(strsplit(rename_vec, " = "), '[', 1))
-keep = c(meta,ordered_markers)
+keep = c(meta, ordered_markers)
 cellsCombined = cellsCombined %>% select(all_of(keep))
 
 # Save DataFrame as a '.rds' file
@@ -397,19 +397,21 @@ Set these variables in the chunk below, then remember to **run** it after.
 
 ```{r}
 # List of FlowJo populations to perform clustering on
-to_cluster = c("CD3+_Img1", "CD3+_Img2")
+to_cluster = c("T cells_a1", "T cells_a2", "T cells_a3")
 # Maximum number of clusters to generate
 maxClust = 30
 # Final number of clusters to keep
-clustNumber = 12
+clustNumber = 10
 # Markers to perform clustering using
 forClust = c("CD4","CD8","Ki67","CCR5","CCR6","CD127","CD45RO",
-             "CD69-Cy5","FoxP3-Biotin","HLA-DR","IL-17")
+             "CD45RA","CD69-Cy5","FoxP3-Biotin","HLA-DR")
 # Column name denoting unique batches if batch correction is needed 
 batchCol = NULL 
 # Order to display markers in on the generated heatmap (does NOT have to include all markers)
-heatmapOrder = c("CD4","CD8","Ki67","CCR5","CCR6","CD127","CD45RO",
-          "CD69-Cy5","FoxP3-Biotin","HLA-DR","IL-17")
+# heatmapOrder = c("CD4","CD8","Ki67","CCR5","CCR6","CD127","CD45RO",
+#                  "CD45RA","CD69-Cy5","FoxP3-Biotin","HLA-DR")
+
+heatmapOrder = c(forClust, setdiff(markers, forClust))
 ```
 
 The code chunk below performs SOM clustering using the variables you have assigned above, then generates 4 graphs that are saved to a new `Graphs` folder:
@@ -479,7 +481,7 @@ spe_subset = makeHeatmap(
 )
 
 # Generate UMAP of individual marker expression values and save to 'Graphs' folder
-png(file.path(getwd(), "../Graphs", "12_Marker_plots.png"), width = 3000, height = 3000, res = 300) 
+png(file.path(getwd(), "../Graphs", paste0(clustNumber, "_Marker_plots.png")), width = 3000, height = 3000, res = 300) 
 plot_list_harmony = multi_dittoDimPlot(
   spe_subset, 
   var=rownames(spe_subset), 
@@ -505,7 +507,7 @@ saveRDS(clust_celltypes, "RDSFiles/clustered_celltypes.rds")
 
 #### b) Annotate Clusters and View Them in Mantis Viewer
 
-After you have viewed and analysed your clusters, you can annotate them by matching the number of each cluster to a corresponding label. For example, I can label Cluster #1 as "T cells" by typing `"1" = "T cells"` in the code chunk below. If you wish to keep the name of a cluster the same, simply omit it from the list.
+After you have viewed and analysed your clusters, you can annotate them by matching the number of each cluster to a corresponding label. For example, you can label Cluster #1 as "T cells" by typing `"1" = "T cells"` in the code chunk below.
 
 This step will generate an `Annotated_CellTypes.csv` file in your `MantisProject` folder, which you can **import** and **view** as new **populations** in Mantis Viewer.
 
@@ -522,19 +524,18 @@ named_clusters = recode(
   "7" = "G",
   "8" = "H",
   "9" = "I",
-  "10" = "J",
-  "11" = "K",
-  "12" = "L"
+  "10" = "J"
 )
 
 # Load in clusters from above and rename them
 named_celltypes = readRDS("RDSFiles/clustered_celltypes.rds")
 named_celltypes$som_clusters_corrected = named_clusters
+names(named_celltypes)[names(named_celltypes) == "som_clusters_corrected"] = "celltype"
+saveRDS(named_celltypes, "RDSFiles/annotated_celltypes.rds")
 
 # Save newly annotated clusters as a CSV to view them in Mantis Viewer
 spe_subset$celltype = named_clusters
 write.table(named_celltypes, "../MantisProject/Annotated_CellTypes.csv", sep=",",  col.names=FALSE, row.names=FALSE)
-saveRDS(named_celltypes, "RDSFiles/annotated_celltypes.rds")
 ```
 
 #### c) Adjust Clusters by Re-assigning Cells If Necessary
@@ -552,19 +553,29 @@ visMarker(spe_subset, "T cell", "CD3", 0.4)
 # **** Assign cells from 'target' population to 'newTarget' based on 'value' of 'marker' being above/below 'direction' ****
 
 # For example, reassign cells from 'T cell' population in to 'B' population if CD3 expression is greater than (>) 0.4
-spe_subset = moveCells(spe_subset, target="B cell", newTarget="T cell", marker="CD3", value=0.4, direction="<")
+spe_subset = moveCells(
+  spe_subset, 
+  target="B cell", 
+  newTarget="T cell", 
+  marker="CD3", 
+  value=0.4, 
+  direction="<"
+)
 
 # Make temporary column the new 'celltype' column
 colData(spe_subset)$celltype = colData(spe_subset)$reassigned_celltype
 colData(spe_subset)$reassigned_celltype = NULL
 
 # Print updated UMAP with annotations (set 'do.label = FALSE' to remove labels)
-UMAP_graph = dittoDimPlot(spe_subset, var = "celltype",
-             reduction.use = "UMAP", size = 1.2,
-             do.label = TRUE, labels.size = 2.5,
-             legend.size = 4) +
-    ggtitle("SOM clusters on UMAP, integrated cells")
-UMAP_graph
+UMAP_graph = dittoDimPlot(
+  spe_subset, 
+  var = "celltype",
+  reduction.use = "UMAP", 
+  size = 1.2,
+  do.label = TRUE, 
+  labels.size = 2.5,
+  legend.size = 4
+) + ggtitle("SOM clusters on UMAP, integrated cells")
 ggsave(file.path("../Graphs", "UMAP_labelled_annotated.png"), UMAP_graph, width = 6, height = 4.5)
 
 # Save subsetted data
