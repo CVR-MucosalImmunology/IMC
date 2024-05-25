@@ -2,7 +2,7 @@
 
 ### **Authors:** oscardong4@gmail.com and heeva.baharlou@gmail.com
 
-## 1. Preprocessing and setting up a `conda` environment
+## 1a. Preprocessing and setting up a `conda` environment
 
 Anaconda is a program used to install packages needed for many steps of the pipeline to run. Follow the steps below to set up Anaconda and a `conda` environment:
 
@@ -34,7 +34,7 @@ conda activate imcsegpipe
 jupyter lab
 ~~~~
 
-This will automatically open a Jupyter instance at `http://localhost:8888/lab` in your browser. Upload the `1 IMCPreprocessing.ipynb` file using the upload button: 
+This will automatically open a Jupyter instance at `http://localhost:8888/lab` in your browser. Upload the `1a IMCPreprocessing.ipynb` file using the upload button: 
 
 <p align="center">
   <img src=".assets/UploadButton.png" />
@@ -42,7 +42,19 @@ This will automatically open a Jupyter instance at `http://localhost:8888/lab` i
 
 From there, follow the instructions in the notebook file.
 
-## 2. Generate images for Cellpose using ImageJ
+## 1b. Removing outliers from images
+
+Open the ImageJ script `1b RemoveOutliers.ijm` and **change all required variables** there before running it: 
+
+<p align="center">
+  <img src=".assets/image11.png" />
+</p>
+
+This script will use the `Remove Outliers...` function in ImageJ to remove any outlier pixels from each image channel. You can read more about the function [here](https://imagej.net/ij/docs/menus/process.html#:~:text=Remove%20Outliers,%2C%20i.e.%2C%20in%20pixels). 
+
+The modified images are saved to the **same** `analysis/1c_full_images` folder, and will simply **replace** the old images. 
+
+## 2. Generating images for Cellpose using ImageJ
 
 Open the ImageJ script `2 ExtractForCellPose.ijm` and **change all required variables** there before running it: 
 
@@ -183,7 +195,7 @@ To correct any 'trouble images', follow the steps below:
 5. Save the image under the same filename it was originally saved to
 
 <p align="center">
-  <img src=".assets/Untitled (1).png" />
+  <img src=".assets/image12.png" />
 </p>
 
 ## 5. Installing and using CellProfiler
