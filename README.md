@@ -34,7 +34,7 @@ conda activate imcsegpipe
 jupyter lab
 ~~~~
 
-This will automatically open a Jupyter instance at `http://localhost:8888/lab` in your browser. Upload the `1a IMCPreprocessing.ipynb` file using the upload button: 
+This will automatically open a Jupyter instance at `http://localhost:8888/lab` in your browser. Upload the `1 IMCPreprocessing.ipynb` file using the upload button: 
 
 <p align="center">
   <img src=".assets/UploadButton.png" />
@@ -44,7 +44,7 @@ From there, follow the instructions in the notebook file.
 
 ## 1b. Removing outliers from images
 
-Open the ImageJ script `1b RemoveOutliers.ijm` and **change all required variables** there before running it: 
+Open the ImageJ script `1.5 RemoveOutliers.ijm` and **change all required variables** there before running it: 
 
 <p align="center">
   <img src=".assets/image11.png" />
