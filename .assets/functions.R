@@ -186,17 +186,17 @@ mantis_pop <- function(image_name, suffix, cellSubs) {
 }
 
 ## Visualise marker histogram to find cut of for filtering cells
-visMarker <- function(speF, target, marker, value, celltype_col = "celltype", assayF = "norm_exprs", group_by = "DonorID", overall_title = NULL, target_title = NULL) {
+visMarker <- function(speF, target, marker, value, celltype_col = "Cluster", assayF = "norm_exprs", group_by = "DonorID", overall_title = NULL, target_title = NULL) {
   # Remove NAs
   plotData <- speF[, !is.na(colData(speF)[[celltype_col]]) & colData(speF)[[celltype_col]] == target]
   plotData$All <- rep("All", length(colnames(plotData)))
   
   # Create titles if not provided
   if (is.null(overall_title)) {
-    overall_title <- paste("Overall Expression of", marker, "in", target, "cells")
+    overall_title <- paste0("Overall Expression of ", marker, " in '", target, "'\nPopulation Across All ", group_by, "s")
   }
   if (is.null(target_title)) {
-    target_title <- paste("Expression of", marker, "in", target, "cells by", group_by)
+    target_title <- paste0("Expression of ", marker, " in '", target, "'\nPopulation by ", group_by)
   }
   
   # Create the first plot by specified group
@@ -205,9 +205,9 @@ visMarker <- function(speF, target, marker, value, celltype_col = "celltype", as
     geom_vline(xintercept = value, col = "black", lwd = 1.5, linetype = "dashed")
   
   # Create a second plot for all cells together
-  plot2 <- dittoRidgePlot(plotData, var = marker, group.by = "All", assay = assayF, max = 1) +
+  plot2 <- dittoRidgePlot(plotData, var = marker, group.by = "All", assay = assayF, max = 1, legend.show=FALSE, xlab=NULL, x.labels=c(""), color.panel="#1591EA") +
     ggtitle(overall_title) +
-    geom_vline(xintercept = value, col = "red", lwd = 1.5, linetype = "dashed")
+    geom_vline(xintercept = value, col = "black", lwd = 1.5, linetype = "dashed")
   
   # Print both plots on the same screen
   grid.arrange(plot1, plot2, ncol = 2)
@@ -215,15 +215,15 @@ visMarker <- function(speF, target, marker, value, celltype_col = "celltype", as
 
 
 # Example usage:
-# visMarker(spe_subset, "celltype", "Cycling DC", "CD20", 0.5, group_by = "DonorID")
+# visMarker(spe_subset, "Cluster", "Cycling DC", "CD20", 0.5, group_by = "DonorID")
 
 
 ## Track population reassignments in real-time in a table written to working directory
 
 # Check if the tracking_table already exists in the global environment
-if (file.exists("clusterModTracker.csv")) {
+if (file.exists("ClusterModTracker.csv")) {
   # Load the existing tracking table from the file
-  tracking_table <<- read.csv("clusterModTracker.csv", stringsAsFactors = FALSE)
+  tracking_table <<- read.csv("ClusterModTracker.csv", stringsAsFactors = FALSE)
 } else {
   # Create a new tracking table if the file doesn't exist
   tracking_table <<- data.frame(
@@ -257,7 +257,7 @@ update_tracking <- function(from_pop, to_pop, marker, value, direction) {
     tracking_table <<- rbind(tracking_table, new_entry)
   }
   
-  write.csv(tracking_table, "clusterModTracker.csv", row.names = FALSE)
+  write.csv(tracking_table, "ClusterModTracker.csv", row.names = FALSE)
 }
 
 # Example Usage
@@ -271,13 +271,13 @@ update_tracking <- function(from_pop, to_pop, marker, value, direction) {
 # Assigns cells from "target" population defined in column 'celltype_col' 
 # to "newTarget" in a new column called *reassigned_celltype* based on 'value' of
 # 'marker' in 'assayF' being above/below 'direction'.
-moveCells <- function(speF, target, newTarget, marker, value, direction, celltype_col = "celltype", assayF = "norm_exprs") {
+moveCells <- function(speF, from, to, marker, value, direction, celltype_col = "Cluster", assayF = "norm_exprs") {
   # Ensure the 'reassigned_celltype' column is present
   colData(speF)$reassigned_celltype <- colData(speF)[[celltype_col]]
   
   # Calculate counts before and after reassignment
   counts_before <- data.frame(colData(speF)) %>%
-    dplyr::filter(reassigned_celltype == target) %>%
+    dplyr::filter(reassigned_celltype == from) %>%
     group_by(DonorID) %>%
     summarize(counts_before = n())
   
@@ -291,12 +291,12 @@ moveCells <- function(speF, target, newTarget, marker, value, direction, celltyp
   }
   
   # Reassign cell types
-  cellTarget <- colData(speF)[[celltype_col]] == target
+  cellTarget <- colData(speF)[[celltype_col]] == from
   reassigned <- cellTarget & cellRemove
-  colData(speF)$reassigned_celltype[reassigned] <- newTarget
+  colData(speF)$reassigned_celltype[reassigned] <- to
   
   counts_after <- data.frame(colData(speF)) %>%
-    dplyr::filter(reassigned_celltype == target) %>%
+    dplyr::filter(reassigned_celltype == from) %>%
     group_by(DonorID) %>%
     summarize(counts_after = n())
   
@@ -316,7 +316,7 @@ moveCells <- function(speF, target, newTarget, marker, value, direction, celltyp
   print(total_counts)
   
   # Update tracking table
-  update_tracking(target, newTarget, marker, value, direction)
+  update_tracking(from, to, marker, value, direction)
   
   return(speF)
 }
@@ -324,7 +324,7 @@ moveCells <- function(speF, target, newTarget, marker, value, direction, celltyp
 # Example usage:
 # moveCells(spe_subset, "Cycling DC", "B cell", "CD20", 0.5, ">")
 
-makeHeatmap <- function(clustOutF, ccpF, ccp_clustNum, graph_type, annotate_labels, save_path,  assayName = "norm_exprs", genes=c("")) {
+makeGraphs <- function(clustOutF, ccpF, ccp_clustNum, graph_type, annotate_labels, save_path,  assayName = "norm_exprs", genes=c("")) {
   # Function clustGraphs: Generates and saves UMAP, Heatmap, and Z-score graphs based on clustering results.
   # - clustOutF: Output of harmonySOM function which contains in entry 1 the SOM clustered data and entry 2 the subsetted SingleCellExperiment object with clustering information.
   # - ccpF: is the ccp variable which holds the output of ConsensusClusterPlus Clustering.
@@ -348,12 +348,12 @@ makeHeatmap <- function(clustOutF, ccpF, ccp_clustNum, graph_type, annotate_labe
   
   # Link ConsensusClusterPlus clusters with SOM codes and save in object
   som.cluster <- ccpF[[ccp_clustNum]][["consensusClass"]][somOutput$clusters]
-  speF$som_clusters_corrected <- as.factor(som.cluster)
+  speF$Cluster <- as.factor(som.cluster)
   
   # Determine graph types and generate accordingly
   if (graph_type %in% c("All", "UMAP")) {
     
-    p1 <- dittoDimPlot(speF, var = "som_clusters_corrected", 
+    p1 <- dittoDimPlot(speF, var = "Cluster", 
                        reduction.use = "UMAP", size = 1.2,
                        do.label = annotate_labels, labels.size = 2.5,
                        legend.size = 4) +
@@ -371,8 +371,8 @@ makeHeatmap <- function(clustOutF, ccpF, ccp_clustNum, graph_type, annotate_labe
                        cluster_rows=F,
                        assay = assayName, scale = "none",
                        heatmap.colors = viridis(100), 
-                       annot.by = c("som_clusters_corrected", "DonorID"),
-                       annot.colors = c(dittoColors(1)[1:length(unique(speF$som_clusters_corrected))],
+                       annot.by = c("Cluster", "DonorID"),
+                       annot.colors = c(dittoColors(1)[1:length(unique(speF$Cluster))],
                                         metadata(speF)$color_vectors$DonorID))
     print(p1)
     ggsave(paste0(save_path, cluster_str, "_Heatmap.png"), p1, width = 8.5, height = 6, dpi = 300)
@@ -380,17 +380,77 @@ makeHeatmap <- function(clustOutF, ccpF, ccp_clustNum, graph_type, annotate_labe
   
   if (graph_type %in% c("All", "Zscore")) {
     celltype_mean <- aggregateAcrossCells(as(speF, "SingleCellExperiment"),  
-                                          ids = speF$som_clusters_corrected, 
+                                          ids = speF$Cluster, 
                                           statistics = "mean",
                                           use.assay.type = "exprs")
     p1 <- dittoHeatmap(celltype_mean,
                        genes = genes, 
                        assay = "exprs", 
                        cluster_rows = F, 
-                       annot.by = c("som_clusters_corrected"))
+                       annot.by = c("Cluster"))
     print(p1)
     ggsave(paste0(save_path, cluster_str, "_Zscore.png"), p1, width = 8.5, height = 6, dpi = 300)
   }
   
   return(speF)
+}
+
+makeAnnotGraphs <- function(speF, ccp_clustNum, graph_type, annotate_labels, save_path, assayName = "norm_exprs", genes=c("")) {
+  # Function clustGraphs: Generates and saves UMAP, Heatmap, and Z-score graphs based on annotations.
+  # - ccp_clustNum: Numeric value of clusters from ConsensusClusterPlus.
+  # - graph_type: Type of graph to generate ('All', 'UMAP', 'Heatmap', 'Zscore').
+  # - annotate_labels: Boolean to indicate whether to annotate labels on graphs.
+  # - save_path: Folder path for saving the generated graphs.
+  
+  set.seed(220228)
+
+  # Check if save_path has a trailing slash and add one if it doesn't
+  if (substr(save_path, nchar(save_path), nchar(save_path)) != "/") {
+    save_path <- paste0(save_path, "/")
+  }
+  
+  # Convert ccp_clustNum to string for file naming
+  cluster_str <- as.character(ccp_clustNum)
+  
+  # Determine graph types and generate accordingly
+  if (graph_type %in% c("All", "UMAP")) {
+    
+    p1 <- dittoDimPlot(speF, var = "Cluster", 
+                       reduction.use = "UMAP", size = 1.2,
+                       do.label = annotate_labels, labels.size = 2.5,
+                       legend.size = 4) +
+      ggtitle("SOM clusters on UMAP, integrated cells")
+    print(p1)
+    ggsave(paste0(save_path, cluster_str, "_UMAP_labelled.png"), p1, width = 6, height = 4.5)
+  }
+  
+  if (graph_type %in% c("All", "Heatmap")) {
+    # Choose the smaller number between the total number of cells and 2000
+    cell_count <- min(ncol(speF), 2000)
+    cur_cells <- sample(seq_len(ncol(speF)), cell_count)
+    p1 <- dittoHeatmap(speF[,cur_cells], 
+                       genes = genes,
+                       cluster_rows=F,
+                       assay = assayName, scale = "none",
+                       heatmap.colors = viridis(100), 
+                       annot.by = c("Cluster", "DonorID"),
+                       annot.colors = c(dittoColors(1)[1:length(unique(speF$Cluster))],
+                                        metadata(speF)$color_vectors$DonorID))
+    print(p1)
+    ggsave(paste0(save_path, cluster_str, "_Heatmap.png"), p1, width = 8.5, height = 6, dpi = 300)
+  }
+  
+  if (graph_type %in% c("All", "Zscore")) {
+    celltype_mean <- aggregateAcrossCells(as(speF, "SingleCellExperiment"),  
+                                          ids = speF$Cluster, 
+                                          statistics = "mean",
+                                          use.assay.type = "exprs")
+    p1 <- dittoHeatmap(celltype_mean,
+                       genes = genes, 
+                       assay = "exprs", 
+                       cluster_rows = F, 
+                       annot.by = c("Cluster"))
+    print(p1)
+    ggsave(paste0(save_path, cluster_str, "_Zscore.png"), p1, width = 8.5, height = 6, dpi = 300)
+  }
 }
