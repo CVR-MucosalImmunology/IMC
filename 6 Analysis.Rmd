@@ -18,7 +18,7 @@ source("https://raw.githubusercontent.com/CVR-MucosalImmunology/IMC/main/.assets
 if (!require("knitr", quietly = TRUE)) {install.packages("knitr")}
 
 # Set your directory here (do NOT touch anything ABOVE this line)
-knitr::opts_knit$set(root.dir = "D:/Oscar/IMC Data/analysis")
+knitr::opts_knit$set(root.dir = "")
 ```
 
 #### b) Install Packages
