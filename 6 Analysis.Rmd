@@ -397,7 +397,7 @@ Set these variables in the chunk below, then remember to **run** it after.
 
 ```{r}
 # List of FlowJo populations to perform clustering on
-to_cluster = c("T cells_a1", "T cells_a2", "T cells_a3")
+to_cluster = c("Im1_T cells", "Im2_T cells", "Im3_T cells")
 # Maximum number of clusters to generate
 maxClust = 30
 # Final number of clusters to keep
@@ -410,8 +410,6 @@ batchCol = NULL
 # Order to display markers in on the generated heatmap (does NOT have to include all markers)
 heatmapOrder = c("CD4","CD8","Ki67","CCR5","CCR6","CD127","CD45RO",
                  "CD45RA","CD69-Cy5","FoxP3-Biotin","HLA-DR")
-
-# heatmapOrder = c(forClust, setdiff(markers, forClust))
 ```
 
 The code chunk below performs SOM clustering using the variables you have assigned above, then generates 4 graphs that are saved to a new `Graphs/Unannotated` folder:
