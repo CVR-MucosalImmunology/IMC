@@ -291,7 +291,7 @@ for (x in seq_along(tiffs)) {
   # Create a new folder for the current image
   dir.create(paste0("../MantisProject/", cur_img), showWarnings = FALSE)
   # Read TIFF and CSV associated with the current image
-  cur_tiff = readTIFF(paste0("1c_full_images/", tiffs[x]), all=TRUE)
+  cur_tiff = suppressWarnings(readTIFF(paste0("1c_full_images/", tiffs[x]), all=TRUE))
   cur_csv = read.csv(paste0("1c_full_images/", csvs[x]), header=FALSE)$V1
   # Save each individual channel in the TIFF as a separate image
   for (channel in seq_along(cur_tiff)) {
