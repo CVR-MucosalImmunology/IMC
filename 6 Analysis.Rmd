@@ -470,6 +470,7 @@ CATALYST:::.plot_delta_area(ccp)
 dir.create("../Graphs", showWarnings = FALSE)
 dir.create("../Graphs/Unannotated", showWarnings = FALSE)
 dir.create("../Graphs/Annotated", showWarnings = FALSE)
+dir.create("../Graphs/Reassigned", showWarnings = FALSE)
 
 spe_subset = makeGraphs(
   clustOutF=clustOut, 
@@ -595,9 +596,9 @@ Once you have decided on an appropriate cut-off value, you can then re-assign ce
 
 -   `marker`: the specific marker to move cells based on
 
--   `value`: the cut-off point chosen for the specific marker
-
 -   `direction`: should be either "\<" or "\>", indicating whether to move cells with a marker expression **below** or **above** the cut-off value
+
+-   `value`: the cut-off point chosen for the specific marker
 
 For example, the sample code given below moves any cells from **"Tregs"** with CD45 expression less than ("\<") 0.6 to the **"Non-immune"** population:
 
@@ -627,8 +628,8 @@ spe_subset = moveCells(
   from="Tregs", 
   to="Non-immune", 
   marker="CD45", 
-  value=0.6, 
-  direction="<"
+  direction="<",
+  value=0.6
 )
 
 # Make temporary column the new 'celltype' column
@@ -641,7 +642,7 @@ makeAnnotGraphs(
   ccp_clustNum=clustNumber, 
   graph_type="All",
   annotate_labels=TRUE,
-  save_path="../Graphs/Annotated",
+  save_path="../Graphs/Reassigned",
   genes=heatmapOrder
 )
 
