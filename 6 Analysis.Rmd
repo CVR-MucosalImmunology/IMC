@@ -651,7 +651,7 @@ saveRDS(spe_subset, "RDSFiles/reassigned_spe.rds")
 
 # Create new population CSV for viewing in Mantis
 reassigned_celltypes = as.data.frame(colData(spe_subset)) %>%
-  select(Image, ImageID, Cluster)
+  select(Image, CellID, Cluster)
 write.table(reassigned_celltypes, "../MantisProject/Reassigned_CellTypes.csv", sep=",",  col.names=FALSE, row.names=FALSE)
 saveRDS(reassigned_celltypes, "RDSFiles/reassigned_celltypes.rds")
 ```
