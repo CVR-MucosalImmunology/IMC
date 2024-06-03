@@ -602,7 +602,7 @@ Once you have decided on an appropriate cut-off value, you can then re-assign ce
 
 For example, the sample code given below moves any cells from **"Tregs"** with CD45 expression less than ("\<") 0.6 to the **"Non-immune"** population:
 
-`spe_subset = moveCells(spe_subset, from="Tregs", to="Non-immune", marker="CD45", value=0.6, direction="<")`
+`spe_subset = moveCells(spe_subset, from="Tregs", to="Non-immune", marker="CD45",``direction="<",``value=0.6)`
 
 Following this, the number of cells before and after the re-assignment in the **original** population will be shown as a table. For example, the table below indicates that for **Donor #1**, there were 224 cells in the **"Tregs"** population **prior** to the re-assignment and 213 cells **after**.
 
