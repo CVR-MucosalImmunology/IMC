@@ -5,3 +5,6 @@
 IMC.Rproj
 analysis
 .DS_Store
+raw
+MoveCellsApp/ClusterModTracker.csv
+MoveCellsApp/new_spe_subset.rds
