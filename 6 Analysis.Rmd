@@ -14,11 +14,11 @@ output: html_document
 Change the `root.dir` variable to your `analysis` folder directory, then run the chunk below.
 
 ```{r setup, include=FALSE}
-source("D:/Oscar/GitHub_IMC/.assets/functions.R")
+source("https://raw.githubusercontent.com/CVR-MucosalImmunology/IMC/main/.assets/functions.R")
 if (!require("knitr", quietly = TRUE)) {install.packages("knitr")}
 
 # Set your directory here (do NOT touch anything ABOVE this line)
-knitr::opts_knit$set(root.dir = "D:/Oscar/GitHub_IMC/analysis")
+knitr::opts_knit$set(root.dir = "analysis")
 ```
 
 #### b) Install Packages
@@ -463,9 +463,9 @@ Set these variables in the chunk below, then remember to **run** it after.
 # List of FlowJo populations to perform clustering on
 to_cluster = c("T cell")
 # Maximum number of clusters to generate
-maxClust = 80
+maxClust = 50
 # Final number of clusters to keep
-clustNumber = 50
+clustNumber = 30
 # Name of assay you wish to take values from
 assay_name = "norm_exprs"
 # Markers to perform clustering using

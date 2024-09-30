@@ -17,20 +17,6 @@ extract_celltypes = function(img) {
   return(as.data.frame(df))
 }
 
-# Function to process each image and write to FCS
-write_fcs <- function(data, image_id) {
-  # Remove 'ImageID' and 'ImageName' column and ensure the rest is numeric
-  subset_data <- as.matrix(data[, -c(1, (ncol(data)-1):ncol(data))])
-  subset_data <- apply(subset_data, 2, as.numeric)
-  # Ensure column names are set
-  colnames(subset_data) <- make.names(colnames(subset_data))
-  # Convert to flowFrame
-  ff <- flowFrame(subset_data)
-  # Write to FCS
-  fcs_filename <- paste0("../FlowJo/", image_id, ".fcs")
-  write.FCS(ff, file = fcs_filename)
-}
-
 ## Subset cells, batch correct and  SOM cluster
 harmonySOM <- function(spe, compartment_vector = NULL, celltype_column = NULL, celltype_values = NULL, clustMarkers = NULL, batchCol = NULL) {
   # Function processes single-cell data for UMAP, PCA, and SOM clustering.
@@ -454,3 +440,119 @@ makeAnnotGraphs <- function(speF, ccp_clustNum, graph_type, annotate_labels, sav
     ggsave(paste0(save_path, cluster_str, "_Zscore.png"), p1, width = 8.5, height = 6, dpi = 300)
   }
 }
+
+
+
+#' Cluster Cells using FlowSOM and ConsensusClusterPlus
+#'
+#' This function performs cell clustering by assigning labels, joining metadata,
+#' running FlowSOM for clustering, and then using ConsensusClusterPlus for clustering
+#' SOM codes into larger clusters.
+#'
+#' @param spe A SingleCellExperiment object that contains cell data and metadata.
+#' @param cells_forClust A dataframe with cells selected for clustering, containing columns for 'ImShort' and 'CellID', and any other metadata needed for clustering.
+#' @param forClust A list of markers used for clustering cells.
+#' @param batchCol A string specifying the column name used for batch correction in the clustering process.
+#' @param maxClust An integer specifying the maximum number of clusters to generate in ConsensusClusterPlus.
+#'
+#' @return A list containing two elements:
+#' \item{clustOut}{The output from the FlowSOM clustering process.}
+#' \item{ccp}{The output from ConsensusClusterPlus clustering of SOM codes.}
+#'
+#' @examples
+#' # Assuming you have already loaded your data into `spe` and selected cells into `cells_forClust`
+#' # forClust is a list of markers used for clustering, and batchCol is the column for batch correction
+#' spe <- readRDS("RDSFiles/spe.rds")
+#' celltype_df <- readRDS("RDSFiles/flowjo_celltypes.rds")
+#' cells_forClust <- select_cells_for_clustering(celltype_df, to_cluster)
+#' batchCol <- "batch"
+#' maxClust <- 20
+#' forClust <- c("Marker1", "Marker2", "Marker3")
+#' 
+#' results <- cluster_cells(spe, cells_forClust, forClust, batchCol, maxClust)
+#'
+cluster_cells <- function(spe, cells_forClust, forClust, batchCol, maxClust) {
+  # Assign these cells the label "Y" to indicate they should be clustered
+  colData(spe)$to_cluster <- NULL
+  cells_forClust$to_cluster <- "Y"
+  
+  # Join cells to be clustered with remaining metadata
+  metadata <- as.data.frame(colData(spe))
+  metadata <- left_join(metadata, cells_forClust, by = c("ImShort", "CellID"))
+  spe$to_cluster <- metadata$to_cluster
+  
+  # Perform FlowSOM clustering
+  clustOut <- suppressWarnings(harmonySOM(
+    spe,
+    celltype_column = "to_cluster",
+    celltype_values = "Y",
+    clustMarkers = forClust,
+    batchCol = batchCol
+  ))
+  
+  # Cluster SOM codes into larger clusters
+  pdf(NULL)  # suppress plot output
+  ccp <- suppressWarnings(suppressMessages(
+    ConsensusClusterPlus(
+      t(clustOut[[1]]$objects$som$codes[[1]]),
+      maxK = maxClust,
+      reps = 100,
+      distance = "euclidean",
+      seed = 220410,
+      plot = NULL
+    )
+  ))
+  invisible(dev.off())  # close the PDF device
+  
+  return(list(clustOut = clustOut, ccp = ccp))
+}
+
+
+
+
+
+#' Save Marker Plots as PNG
+#'
+#' This function generates marker plots using `multi_dittoDimPlot` for each marker in `spe_subset`
+#' and saves them as a PNG file in the specified directory.
+#'
+#' @param spe_subset The subsetted SingleCellExperiment object with clustering results.
+#' @param clustNumber The cluster number to use in the file name.
+#' @param output_dir The directory where the PNG file will be saved (default: "../Graphs/Unannotated").
+#' @param assayName The assay name to use for generating the plots (default: "norm_exprs").
+#'
+#' @return None. Saves a PNG file with the marker plots in the specified directory.
+#'
+#' @examples
+#' save_marker_plots(spe_subset, clustNumber)
+#'
+save_marker_plots <- function(spe_subset, clustNumber, output_dir = "../Graphs/Unannotated", assayName = "norm_exprs") {
+  
+  # Create the output file path
+  png(file.path(getwd(), output_dir, "Marker_plots.png"), 
+      width = 3000, height = 3000, res = 300)
+  
+  # Generate marker plots using multi_dittoDimPlot
+  plot_list_harmony <- multi_dittoDimPlot(
+    spe_subset, 
+    var = rownames(spe_subset), 
+    reduction.use = "UMAP", 
+    assay = assayName, 
+    size = 0.2, 
+    list.out = TRUE
+  )
+  
+  # Apply viridis color scale to each plot
+  plot_list_harmony <- suppressMessages(lapply(
+    plot_list_harmony,
+    function(x) x + scale_color_viridis()
+  ))
+  
+  # Combine and print the plots
+  print(plot_grid(plotlist = plot_list_harmony))
+  
+  # Close the PNG device
+  invisible(dev.off())
+}
+
+
