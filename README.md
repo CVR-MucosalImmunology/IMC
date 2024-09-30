@@ -25,9 +25,9 @@ cd ImcSegmentationPipeline
 git clone --recursive https://github.com/CVR-MucosalImmunology/IMC.git
 conda env create -f environment.yml
 conda activate imcsegpipe
-pip uninstall tifffile -y
-pip install tifffile==2024.8.10 -y
-pip install jupyterlab -y
+pip uninstall tifffile
+pip install tifffile==2024.8.10
+pip install jupyterlab
 ~~~~
 
 The `imcsegpipe` conda environment has now been **set up**! To begin on the first step of the pipeline, copy the following commands into the terminal to **activate** this new environment:
