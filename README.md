@@ -1,4 +1,4 @@
-# Pre-R IMC Pipeline Documentation
+# Pre-R IMC Pipeline Documentation 
 
 ### **Authors:** oscardong4@gmail.com and heeva.baharlou@gmail.com
 
